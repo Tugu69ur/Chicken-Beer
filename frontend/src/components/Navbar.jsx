@@ -3,9 +3,11 @@ import { useState } from "react";
 import logo from "../assets/logo.png";
 import Login from "./Login";
 import basket from "../assets/basket.png";
+import ProfileIcon from "../assets/profile.png"; // Assuming you have a profile icon
 
 function Navbar({ basketCount, orders }) {
   const [showLogin, setShowLogin] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
@@ -36,15 +38,30 @@ function Navbar({ basketCount, orders }) {
             </Link>
 
             {user ? (
-              <>
-                <span className="text-gray-700">{user.name}</span>
-                {/* <button
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-red-600"
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  className="flex items-center gap-2 focus:outline-none"
                 >
-                  Гарах
-                </button> */}
-              </>
+                  <img
+                    src={ProfileIcon}
+                    alt="User"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                  <span className="text-gray-700 font-bold">{user.name}</span>
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-10">
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Гарах
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
