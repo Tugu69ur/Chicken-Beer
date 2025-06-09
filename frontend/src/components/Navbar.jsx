@@ -16,6 +16,7 @@ function Navbar({ basketCount, orders }) {
   const handleLogout = () => {
     localStorage.clear();
     setUser(null);
+    window.location.href = "/";
   };
 
   return (
@@ -71,14 +72,14 @@ function Navbar({ basketCount, orders }) {
               </button>
             )}
 
-            <Link to="/orders" className="relative">
+            {/* <Link to="/orders" className="relative">
               <img src={basket} alt="Basket" className="h-8" />
               {basketCount > 0 && (
                 <span className="absolute top-0 right-0 bg-[#D81E1E] text-white text-xs rounded-full px-1">
                   {basketCount}
                 </span>
               )}
-            </Link>
+            </Link> */}
           </div>
         </div>
       </nav>

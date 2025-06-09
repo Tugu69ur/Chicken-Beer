@@ -7,7 +7,6 @@ import Navbar from "../components/Navbar";
 import MyOrders from "../pages/MyOrders";
 import Footer from "../components/Footer.jsx";
 
-
 const Home = () => {
   const images = [logo2, logo1, logo];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,11 +48,12 @@ const Home = () => {
       quantity: 1,
       image: item.image,
     };
-  
+
     const updatedOrders = [...orders, orderItem];
     setOrders(updatedOrders);
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
-  
+    window.dispatchEvent(new Event("cartUpdated"));
+
     updateBasketCount(1);
     const newCount = basketCount + 1;
     localStorage.setItem("basketCount", newCount);
@@ -64,7 +64,6 @@ const Home = () => {
     setOrders(savedOrders);
     setBasketCount(savedCount);
   }, []);
-    
 
   return (
     <>
@@ -97,13 +96,11 @@ const Home = () => {
           </div>
         )}
       </div>
-        <div className="h-24 w-full bg-slate-100">
-
-        </div>
+      <div className="h-24 w-full bg-slate-100"></div>
       <div ref={orderRef} className="mt-[-40px]">
         <Order addOrder={addOrder} />
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };
