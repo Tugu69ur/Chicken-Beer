@@ -5,6 +5,8 @@ import { useState, useEffect, useRef } from "react";
 import Order from "../components/Order";
 import Navbar from "../components/Navbar";
 import MyOrders from "../pages/MyOrders";
+import Footer from "../components/Footer.jsx";
+
 
 const Home = () => {
   const images = [logo2, logo1, logo];
@@ -101,6 +103,7 @@ const Home = () => {
       <div ref={orderRef} className="mt-[-40px]">
         <Order addOrder={addOrder} />
       </div>
+      <Footer/>
     </>
   );
 };
