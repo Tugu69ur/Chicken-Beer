@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { List, Card, Typography, Divider, Empty, Modal, InputNumber, Button, message } from "antd";
 import { DeleteOutlined, EditOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import Navbar from "../components/Navbar";
-
+import Qpay from "../pages/qpay.jsx"
+import { useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 function MyOrders() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
   const [deleteConfirmOrder, setDeleteConfirmOrder] = useState(null);
@@ -75,7 +77,10 @@ function MyOrders() {
             size="large"
             icon={<ShoppingCartOutlined />}
             className="mt-4"
-            onClick={() => window.location.href = '/'}
+            onClick={() => {
+              const totalAmount = calculateTotal();
+              navigate('/qpay', { state: { amount: totalAmount } });
+            }}
           >
             Захиалга хийх
           </Button>
@@ -91,9 +96,7 @@ function MyOrders() {
           <Title level={2} className="!mb-0">
             Таны сагс
           </Title>
-          <Text className="text-lg">
-            Нийт: <span className="font-bold text-red-600">{calculateTotal().toLocaleString()}₮</span>
-          </Text>
+ 
         </div>
 
         <List
@@ -190,12 +193,17 @@ function MyOrders() {
               Үргэлжлүүлэх
             </Button>
             <Button 
-              type="primary" 
-              size="large"
-              onClick={() => message.success("Захиалга амжилттай илгээгдлээ")}
-            >
-              Захиалга хийх
-            </Button>
+            type="primary" 
+            size="large"
+            icon={<ShoppingCartOutlined />}
+            className="mt-4"
+            onClick={() => {
+              const totalAmount = calculateTotal();
+              navigate('/qpay', { state: { amount: totalAmount } });
+            }}
+          >
+            Захиалга хийх
+          </Button>
           </div>
         </Card>
       </div>
