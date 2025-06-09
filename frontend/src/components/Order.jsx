@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BASE_URL } from "../../constants.js";
+import { useNavigate } from "react-router-dom";
 
 function groupByCategory(items) {
   const grouped = {};
@@ -13,10 +14,32 @@ function groupByCategory(items) {
 function Menu({ addOrder }) {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleAddToBasket = (item) => {
-    addOrder(item);
-    console.log(`Added to basket: ${item.name}`);
+    setSelectedItem(item);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmAddToBasket = () => {
+    if (selectedItem) {
+      addOrder(selectedItem);
+      console.log(`Added to basket: ${selectedItem.name}`);
+      setShowConfirmDialog(false);
+      setShowSuccess(true);
+    }
+  };
+
+  const handleContinueShopping = () => {
+    setShowSuccess(false);
+    setSelectedItem(null);
+  };
+
+  const handleGoToOrders = () => {
+    navigate('/orders');
   };
 
   useEffect(() => {
@@ -79,6 +102,54 @@ function Menu({ addOrder }) {
           </div>
         </div>
       ))}
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Сагсанд нэмэх</h3>
+            <p className="mb-4">Та {selectedItem?.name} сагсанд нэмэхдээ итгэлтэй байна уу?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Үгүй
+              </button>
+              <button
+                className="px-4 py-2 bg-[#D81E1E] text-white rounded hover:bg-red-700"
+                onClick={confirmAddToBasket}
+              >
+                Тийм
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Dialog */}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4 text-green-600">Сагсанд хийлээ</h3>
+            <p className="mb-4">Таны сагсанд амжилттай хийлэээ.</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={handleContinueShopping}
+              >
+                Бүтээгдэхүүн нэмэх
+              </button>
+              <button
+                className="px-4 py-2 bg-[#D81E1E] text-white rounded hover:bg-red-700"
+                onClick={handleGoToOrders}
+              >
+                Захиалга дуусгах
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
