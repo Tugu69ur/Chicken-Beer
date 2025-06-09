@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 import Login from "./Login";
 import basket from "../assets/basket.png";
 
-function Navbar({ basketCount }) {
+function Navbar({ basketCount, orders }) {
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
@@ -54,14 +54,14 @@ function Navbar({ basketCount }) {
               </button>
             )}
 
-            <div className="relative">
+            <Link to="/orders" className="relative">
               <img src={basket} alt="Basket" className="h-8" />
               {basketCount > 0 && (
                 <span className="absolute top-0 right-0 bg-[#D81E1E] text-white text-xs rounded-full px-1">
                   {basketCount}
                 </span>
               )}
-            </div>
+            </Link>
           </div>
         </div>
       </nav>
@@ -77,6 +77,7 @@ function Navbar({ basketCount }) {
           }}
         />
       )}
+      <div className="w-full h-4 bg-red-600"></div>
     </>
   );
 }

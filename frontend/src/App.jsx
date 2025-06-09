@@ -3,15 +3,17 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Register from "./components/Register";
+import MyOrders from "./pages/MyOrders";
 import 'antd/dist/reset.css';
 
 function App() {
   return (
     <Router>
-      <Routes>
+      <Routes>  
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/orders" element={<MyOrders />} />
       </Routes>
     </Router>
   );

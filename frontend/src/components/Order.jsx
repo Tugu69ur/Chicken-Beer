@@ -45,7 +45,7 @@ function Menu({ addOrder }) {
     return <div className="text-center mt-20">No menu items found</div>;
 
   return (
-    <div className="p-16">
+    <div className="px-44 mt-16">
       {menu.map((category, idx) => (
         <div key={idx} className="mb-12">
           <h1 className="text-3xl mb-6 ml-6 text-start">{category.title}</h1>
@@ -58,16 +58,16 @@ function Menu({ addOrder }) {
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-70 object-cover"
+                  className="w-full h-65 object-cover"
                 />
                 <div className="p-4 transition-all duration-300">
                   <h2 className="text-md font-bold">{item.name}</h2>
-                  <p className="text-red-600 font-semibold">{item.price}</p>
+                  <p className="text-red-600 font-bold text-2xl">{item.price}</p>
 
-                  <div className="mt-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-40 transition-all duration-300 overflow-hidden">
+                  <div className="mt-[-20px] opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-40 transition-all duration-300 overflow-hidden">
                     <p className="text-sm text-gray-600">{item.description}</p>
                     <button
-                      className="w-full h-[40px] mt-2 px-3 py-1 bg-[#D81E1E] text-white text-sm font-bold rounded hover:bg-red-700"
+                      className="w-full h-[40px] px-3 py-1 bg-[#D81E1E] text-white text-sm font-bold rounded hover:bg-red-700"
                       onClick={() => handleAddToBasket(item)}
                     >
                       Сагсанд хийх

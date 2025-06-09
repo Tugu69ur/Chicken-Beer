@@ -41,13 +41,32 @@ const Home = () => {
   };
 
   const addOrder = (item) => {
-    setOrders((prevOrders) => [...prevOrders, item]);
+    const orderItem = {
+      name: item.name,
+      price: item.price,
+      quantity: 1,
+      image: item.image,
+    };
+  
+    const updatedOrders = [...orders, orderItem];
+    setOrders(updatedOrders);
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+  
     updateBasketCount(1);
+    const newCount = basketCount + 1;
+    localStorage.setItem("basketCount", newCount);
   };
+  useEffect(() => {
+    const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
+    const savedCount = parseInt(localStorage.getItem("basketCount")) || 0;
+    setOrders(savedOrders);
+    setBasketCount(savedCount);
+  }, []);
+    
 
   return (
     <>
-      <Navbar basketCount={basketCount} />
+      <Navbar basketCount={basketCount} orders={orders} />
       <div className="relative w-full h-[657px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-l from-black/50 to-transparent z-10" />
         <img
@@ -76,10 +95,12 @@ const Home = () => {
           </div>
         )}
       </div>
-      <div ref={orderRef} className="mt-10">
+        <div className="h-24 w-full bg-slate-100">
+
+        </div>
+      <div ref={orderRef} className="mt-[-40px]">
         <Order addOrder={addOrder} />
       </div>
-      <MyOrders orders={orders} />
     </>
   );
 };
