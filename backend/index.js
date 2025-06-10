@@ -6,14 +6,18 @@ import loginRoutes from "./routes/login_routes.js";
 import menuRoutes from "./routes/menu_routes.js";
 import orderRoutes from "./routes/order_routes.js";
 import qpayRoutes from "./routes/qpay_routes.js";
+import otpRoutes  from './routes/authRoutes.js';  // use import here
 import cors from "cors";
+import bodyParser from "body-parser";
 
 dotenv.config();
 
 connectDB();
+
 const PORT = process.env.PORT || 7000;
 
 const app = express();
+app.use(bodyParser.json());
 app.use(express.json());
 
 app.use(
@@ -27,6 +31,8 @@ app.use("/api/login", loginRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/qpay", qpayRoutes);
+app.use('/api/otp', otpRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

@@ -8,8 +8,13 @@ function Login({ onClose }) {
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
+    otp: "",
   });
+
+  // Control which step of reset password flow is shown
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,20 +33,22 @@ function Login({ onClose }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          phone: formData.phone,
+          password: formData.password,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Store tokens and user info (you can use localStorage or sessionStorage)
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("user", JSON.stringify(data.user));
 
         toast.success("Амжилттай нэвтэрлээ");
         onClose();
-        window.location.reload(); 
+        window.location.reload();
       } else {
         toast.error(data.message || "Нууц үг эсвэл утасны дугаар буруу байна");
       }
@@ -50,10 +57,99 @@ function Login({ onClose }) {
     }
   };
 
-  const handleResetPassword = (e) => {
+const handleSendOtp = async (e) => {
+  e.preventDefault();
+
+  if (!formData.phone) {
+    toast.error("Утасны дугаар оруулна уу");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}api/otp/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: formData.phone }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      toast.success("OTP амжилттай илгээгдлээ");
+      setOtpSent(true);
+      setVerifyingOtp(true);
+    } else {
+      toast.error(data.error || "OTP илгээхэд алдаа гарлаа");
+    }
+  } catch (error) {
+    toast.error("Сүлжээний алдаа: " + error.message);
+  }
+};
+
+
+const handleVerifyOtp = async (e) => {
+  e.preventDefault();
+
+  if (!formData.otp) {
+    toast.error("OTP код оруулна уу");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}api/otp/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: formData.phone, otp: formData.otp }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      toast.success("OTP баталгаажлаа");
+      setVerifyingOtp(false);
+    } else {
+      toast.error(data.error || "OTP буруу байна");
+    }
+  } catch (error) {
+    toast.error("Сүлжээний алдаа: " + error.message);
+  }
+};
+
+
+
+  // Step 3: Reset password
+  const handleResetPassword = async (e) => {
     e.preventDefault();
-    // Add reset password logic here
-    console.log("Reset password for:", formData.phone);
+
+    if (!formData.password) {
+      toast.error("Шинэ нууц үг оруулна уу");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}api/otp/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: formData.phone,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Нууц үг амжилттай шинэчлэгдлээ");
+        setShowResetPassword(false);
+        setOtpSent(false);
+        setVerifyingOtp(false);
+        setFormData({ phone: "", password: "", otp: "" });
+      } else {
+        toast.error(data.error || "Нууц үг шинэчлэхэд алдаа гарлаа");
+      }
+    } catch (error) {
+      toast.error("Сүлжээний алдаа: " + error.message);
+    }
   };
 
   const handleBackdropClick = (e) => {
@@ -81,9 +177,7 @@ function Login({ onClose }) {
             <h2 className="text-2xl font-bold text-center mb-6">Нэвтрэх</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-gray-700 mb-2">
-                  Утасны дугаар
-                </label>
+                <label className="block text-gray-700 mb-2">Утасны дугаар</label>
                 <input
                   type="tel"
                   name="phone"
@@ -122,7 +216,12 @@ function Login({ onClose }) {
                 Бүртгүүлэх
               </Link>
               <button
-                onClick={() => setShowResetPassword(true)}
+                onClick={() => {
+                  setShowResetPassword(true);
+                  setFormData({ phone: "", password: "", otp: "" });
+                  setOtpSent(false);
+                  setVerifyingOtp(false);
+                }}
                 className="text-gray-600 hover:text-gray-700"
               >
                 Нууц үг сэргээх
@@ -131,31 +230,73 @@ function Login({ onClose }) {
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-center mb-6">
-              Нууц үг сэргээх
-            </h2>
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-2">
-                  Утасны дугаар
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
-                  placeholder="Утасны дугаар"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-colors"
-              >
-                Илгээх
-              </button>
-            </form>
+            <h2 className="text-2xl font-bold text-center mb-6">Нууц үг сэргээх</h2>
+
+            {!otpSent ? (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">Утасны дугаар</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="Утасны дугаар"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-colors"
+                >
+                  OTP илгээх
+                </button>
+              </form>
+            ) : verifyingOtp ? (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">OTP код</label>
+                  <input
+                    type="text"
+                    name="otp"
+                    value={formData.otp}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="OTP код"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Батлах
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">Шинэ нууц үг</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="Шинэ нууц үг"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Шинэчлэх
+                </button>
+              </form>
+            )}
+
             <div className="mt-4 text-center">
               <button
                 onClick={() => setShowResetPassword(false)}
