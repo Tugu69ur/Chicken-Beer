@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import logo from "../assets/logo.png";
 import Login from "./Login";
-import basket from "../assets/basket.png";
 import ProfileIcon from "../assets/profile.png"; // Assuming you have a profile icon
 
 function Navbar({ basketCount, orders }) {

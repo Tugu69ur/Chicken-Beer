@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { BASE_URL } from "../../constants.js";
 import { useNavigate } from "react-router-dom";
+import icon from "../assets/cart.png";
+import { Modal, Row, Col, Button, Typography } from "antd";
+
+const { Title, Text, Paragraph } = Typography;
 
 function groupByCategory(items) {
   const grouped = {};
@@ -16,6 +20,16 @@ function Menu({ addOrder }) {
   const [loading, setLoading] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+
+  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
+  const getNumericPrice = (priceString) => {
+    return parseInt(priceString.replace(/[^\d]/g, ""), 10);
+  };
+
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
@@ -39,7 +53,7 @@ function Menu({ addOrder }) {
   };
 
   const handleGoToOrders = () => {
-    navigate('/orders');
+    navigate("/orders");
   };
 
   useEffect(() => {
@@ -85,7 +99,9 @@ function Menu({ addOrder }) {
                 />
                 <div className="p-4 transition-all duration-300">
                   <h2 className="text-md font-bold">{item.name}</h2>
-                  <p className="text-red-600 font-bold text-2xl">{item.price}</p>
+                  <p className="text-red-600 font-bold text-2xl">
+                    {item.price}
+                  </p>
 
                   <div className="mt-[-20px] opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-40 transition-all duration-300 overflow-hidden">
                     <p className="text-sm text-gray-600">{item.description}</p>
@@ -103,52 +119,115 @@ function Menu({ addOrder }) {
         </div>
       ))}
 
-      {/* Confirmation Dialog */}
-      {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Сагсанд нэмэх</h3>
-            <p className="mb-4">Та {selectedItem?.name} сагсанд нэмэхдээ итгэлтэй байна уу?</p>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setShowConfirmDialog(false)}
-              >
-                Үгүй
-              </button>
-              <button
-                className="px-4 py-2 bg-[#D81E1E] text-white rounded hover:bg-red-700"
-                onClick={confirmAddToBasket}
-              >
-                Тийм
-              </button>
-            </div>
-          </div>
+      <Modal
+        open={showConfirmDialog}
+        onCancel={() => setShowConfirmDialog(false)}
+        footer={null}
+        width={600}
+        centered
+        bodyStyle={{ padding: 24 }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src={icon} alt={selectedItem?.name} className="w-6 h-6" />
+          <Title level={3} style={{ margin: 0 }}>
+            Захиалга
+          </Title>
         </div>
-      )}
+
+        {selectedItem && (
+          <Row gutter={24} align="middle">
+            {/* Image Section */}
+            <Col xs={24} md={10}>
+              <img
+                src={selectedItem.image}
+                alt={selectedItem.name}
+                style={{
+                  width: "100%",
+                  height: 150,
+                  borderRadius: 12,
+                  objectFit: "cover",
+                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
+                }}
+              />
+            </Col>
+
+            {/* Info Section */}
+            <Col xs={24} md={14}>
+              <Title level={4} style={{ marginBottom: 2, marginTop: 0 }}>
+                {selectedItem.name}
+              </Title>
+              <Text strong style={{ fontSize: 16 }}>
+                {getNumericPrice(selectedItem.price).toLocaleString()} ₮
+              </Text>
+              <Paragraph type="secondary" style={{ marginTop: 8 }}>
+                {selectedItem.description}
+              </Paragraph>
+
+              {/* Quantity Controls */}
+              <div
+                style={{ display: "flex", alignItems: "center", marginTop: 16 }}
+              >
+                <Button shape="circle" onClick={decreaseQuantity}>
+                  −
+                </Button>
+                <span style={{ margin: "0 16px", fontSize: 18 }}>
+                  {quantity}
+                </span>
+                <Button shape="circle" onClick={increaseQuantity}>
+                  +
+                </Button>
+              </div>
+
+              {/* Total & Action Button */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: 24,
+                }}
+              >
+                <Text strong style={{ fontSize: 20, color: "#D81E1E" }}>
+                  {(
+                    getNumericPrice(selectedItem.price) * quantity
+                  ).toLocaleString()}{" "}
+                  ₮
+                </Text>
+                <Button type="primary" danger onClick={confirmAddToBasket}>
+                  Сагсанд хийх
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        )}
+      </Modal>
 
       {/* Success Dialog */}
+
       {showSuccess && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4 text-green-600">Сагсанд хийлээ</h3>
-            <p className="mb-4">Таны сагсанд амжилттай хийлэээ.</p>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={handleContinueShopping}
-              >
-                Бүтээгдэхүүн нэмэх
-              </button>
-              <button
-                className="px-4 py-2 bg-[#D81E1E] text-white rounded hover:bg-red-700"
-                onClick={handleGoToOrders}
-              >
-                Захиалга дуусгах
-              </button>
-            </div>
+        <Modal
+          open={showSuccess}
+          footer={null}
+          centered
+          closable={false}
+          bodyStyle={{ padding: 24, textAlign: "center" }}
+          maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <Title level={3} style={{ color: "#4a934a", marginBottom: 16 }}>
+            Сагсанд хийлээ
+          </Title>
+          <Paragraph style={{ marginBottom: 24 }}>
+            Таны сагсанд амжилттай хийлэээ.
+          </Paragraph>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+            <Button onClick={handleContinueShopping} type="default">
+              Бүтээгдэхүүн нэмэх
+            </Button>
+            <Button onClick={handleGoToOrders} type="primary" danger>
+              Захиалга дуусгах
+            </Button>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
