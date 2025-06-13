@@ -27,15 +27,17 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [images.length]);
 
-  const handleOrderClick = () => {
-    if (orderRef.current) {
-      const yOffset = -80;
-      const y =
-        orderRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
+const handleOrderClick = () => {
+  if (orderRef.current) {
+    const yOffset = -80;
+    const y =
+      orderRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
 
+    setTimeout(() => {
       window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+    }, 50); // slight delay
+  }
+};
 
   const updateBasketCount = (count) => {
     setBasketCount((prevCount) => prevCount + count);
