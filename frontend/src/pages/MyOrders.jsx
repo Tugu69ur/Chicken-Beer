@@ -24,6 +24,7 @@ import {
 } from "@ant-design/icons";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer.jsx";
 const { Title, Text } = Typography;
 
 function MyOrders() {
@@ -44,9 +45,9 @@ function MyOrders() {
     }, 0);
   };
 
-  const handleEdit = (order) => {
-    setEditingOrder({ ...order });
-  };
+  // const handleEdit = (order) => {
+  //   setEditingOrder({ ...order });
+  // };
 
   const handleSaveEdit = () => {
     if (editingOrder) {
@@ -111,9 +112,15 @@ function MyOrders() {
   return (
     <>
       <Navbar />
-      <div className="p-10 max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <Title level={2} className="!mb-0">
+      <div className="p-10 max-w-6xl mx-auto mb-72">
+        <div className="flex items-center mb-6 ">
+          <Button
+            size="large"
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate("/")}
+          ></Button>
+          <Title level={2} className="!mb-0 ml-8">
             Таны сагс
           </Title>
         </div>
@@ -159,45 +166,38 @@ function MyOrders() {
                         style={{ width: "100%" }}
                       >
                         <Space>
+                          <Text strong className="text-lg mr-7">
+                            {total.toLocaleString()}₮
+                          </Text>
                           <Button
                             icon={<MinusOutlined />}
+                            style={{ marginRight: 4 }}
                             onClick={() =>
                               handleQuantityChange(order, order.quantity - 1)
                             }
                             disabled={order.quantity <= 1}
                           />
+
                           <Text
                             strong
                             className="text-lg min-w-[40px] text-center"
                           >
                             {order.quantity}
                           </Text>
+
                           <Button
                             icon={<PlusOutlined />}
+                            style={{ marginRight: 4 }}
                             onClick={() =>
                               handleQuantityChange(order, order.quantity + 1)
                             }
                           />
-                        </Space>
-                        <Text strong className="text-lg">
-                          {total.toLocaleString()}₮
-                        </Text>
-                        <Space>
-                          <Button
-                            type="primary"
-                            icon={<EditOutlined />}
-                            style={{ backgroundColor: '#D81E1E', borderColor: '#D81E1E' }}
-                            onClick={() => handleEdit(order)}
-                          >
-                            Засах
-                          </Button>
+
                           <Button
                             danger
                             icon={<DeleteOutlined />}
                             onClick={() => handleDelete(order)}
-                          >
-                            Устгах
-                          </Button>
+                          />
                         </Space>
                       </Space>
                     </Col>
@@ -229,16 +229,9 @@ function MyOrders() {
           <Divider />
           <div className="flex justify-end gap-4">
             <Button
-              size="large"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/")}
-            >
-              Буцах
-            </Button>
-            <Button
               type="primary"
               size="large"
-              style={{ backgroundColor: '#D81E1E', borderColor: '#D81E1E' }}
+              style={{ backgroundColor: "#D81E1E", borderColor: "#D81E1E" }}
               icon={<ShoppingCartOutlined />}
               onClick={() => {
                 const totalAmount = calculateTotal();
@@ -318,6 +311,7 @@ function MyOrders() {
           Та {deleteConfirmOrder?.name} захиалгыг устгахдаа итгэлтэй байна уу?
         </p>
       </Modal>
+      <Footer />
     </>
   );
 }
