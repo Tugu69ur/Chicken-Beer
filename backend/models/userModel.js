@@ -12,17 +12,22 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  email: { // И-мэйл
+  email: { 
     type: String,
     required: true,
     unique: true,
     lowercase: true,
     trim: true
   },
-  password: { // Нууц үг
+  password: { 
     type: String,
     required: true
   },
+role:{
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+},
   createdAt: {
     type: Date,
     default: Date.now

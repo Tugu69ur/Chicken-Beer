@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Register from "./components/Register";
 import Qpay from "./pages/qpay.jsx";
 import MyOrders from "./pages/MyOrders";
+import Map from "./pages/Map.jsx"
 import 'antd/dist/reset.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/orders" element={<MyOrders />} />
         <Route path="/qpay" element={<Qpay />} />
+        <Route path="/map" element={<Map />} />
       </Routes>
     </Router>
   );

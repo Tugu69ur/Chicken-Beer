@@ -15,4 +15,50 @@ body {
 html {
   scroll-behavior: smooth;
 }
+.leaflet-marker-icon.round-icon {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
 
+/* App.css or index.css */
+@import "leaflet/dist/leaflet.css";
+
+.custom-search .ant-input {
+  border-radius: 4px 0 0 4px;
+  border-color: #D81E1E;
+  background-color: white;
+  color: #000;
+  transition: border-color 0.3s;
+  box-shadow: none !important;
+}
+
+.custom-search .ant-input:focus,
+.custom-search .ant-input:focus-visible {
+  border-color: #D81E1E !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-search .ant-input-search-button {
+  background-color: #D81E1E !important;
+  border-color: #D81E1E !important;
+  border-radius: 0 4px 4px 0;
+  color: white !important;
+  box-shadow: none !important;
+  transition: background-color 0.3s;
+}
+
+.custom-search .ant-input-search-button:hover,
+.custom-search .ant-input-search-button:focus,
+.custom-search .ant-input-search-button:focus-visible {
+  background-color: #b11616 !important;
+  border-color: #b11616 !important;
+  color: white !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-search .ant-input-search-button svg {
+  fill: white;
+}

@@ -27,27 +27,27 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [images.length]);
 
-const handleOrderClick = () => {
-  if (orderRef.current) {
-    const yOffset = -80;
-    const y =
-      orderRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
+  const handleOrderClick = () => {
+    if (orderRef.current) {
+      const yOffset = -80;
+      const y =
+        orderRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
 
-    setTimeout(() => {
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }, 50); // slight delay
-  }
-};
+      setTimeout(() => {
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }, 50); // slight delay
+    }
+  };
 
   const updateBasketCount = (count) => {
     setBasketCount((prevCount) => prevCount + count);
   };
 
-  const addOrder = (item) => {
+  const addOrder = (item, quantity) => {
     const orderItem = {
       name: item.name,
       price: item.price,
-      quantity: 1,
+      quantity: quantity,
       image: item.image,
     };
 
@@ -56,8 +56,8 @@ const handleOrderClick = () => {
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
     window.dispatchEvent(new Event("cartUpdated"));
 
-    updateBasketCount(1);
-    const newCount = basketCount + 1;
+    updateBasketCount(quantity);
+    const newCount = basketCount + quantity;
     localStorage.setItem("basketCount", newCount);
   };
   useEffect(() => {

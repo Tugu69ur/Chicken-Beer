@@ -30,7 +30,7 @@ function Navbar({ basketCount, orders }) {
             <Link to="/" className="text-gray-700 hover:text-[#D81E1E]">
               Меню
             </Link>
-            <Link to="/bar" className="text-gray-700 hover:text-[#D81E1E]">
+            <Link to="/map" className="text-gray-700 hover:text-[#D81E1E]">
               Салбар
             </Link>
             <Link to="/delivery" className="text-gray-700 hover:text-[#D81E1E]">

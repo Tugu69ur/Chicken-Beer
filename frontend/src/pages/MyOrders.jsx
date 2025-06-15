@@ -1,8 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { List, Card, Typography, Divider, Empty, Modal, InputNumber, Button, message } from "antd";
-import { DeleteOutlined, EditOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from "@ant-design/icons";
+import {
+  List,
+  Card,
+  Typography,
+  Divider,
+  Empty,
+  Modal,
+  InputNumber,
+  Button,
+  message,
+  Space,
+  Row,
+  Col,
+  Statistic,
+} from "antd";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ShoppingCartOutlined,
+  PlusOutlined,
+  MinusOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
 import Navbar from "../components/Navbar";
-import Qpay from "../pages/qpay.jsx"
 import { useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
@@ -20,7 +40,7 @@ function MyOrders() {
   const calculateTotal = () => {
     return orders.reduce((total, order) => {
       const cleanPrice = Number(order.price.replace(/[,₮]/g, "")) || 0;
-      return total + (cleanPrice * order.quantity);
+      return total + cleanPrice * order.quantity;
     }, 0);
   };
 
@@ -30,7 +50,7 @@ function MyOrders() {
 
   const handleSaveEdit = () => {
     if (editingOrder) {
-      const updatedOrders = orders.map(order => 
+      const updatedOrders = orders.map((order) =>
         order.name === editingOrder.name ? editingOrder : order
       );
       setOrders(updatedOrders);
@@ -46,7 +66,9 @@ function MyOrders() {
 
   const confirmDelete = () => {
     if (deleteConfirmOrder) {
-      const updatedOrders = orders.filter(order => order.name !== deleteConfirmOrder.name);
+      const updatedOrders = orders.filter(
+        (order) => order.name !== deleteConfirmOrder.name
+      );
       setOrders(updatedOrders);
       localStorage.setItem("orders", JSON.stringify(updatedOrders));
       setDeleteConfirmOrder(null);
@@ -56,7 +78,7 @@ function MyOrders() {
 
   const handleQuantityChange = (order, newQuantity) => {
     if (newQuantity < 1) return;
-    const updatedOrders = orders.map(item => 
+    const updatedOrders = orders.map((item) =>
       item.name === order.name ? { ...item, quantity: newQuantity } : item
     );
     setOrders(updatedOrders);
@@ -68,21 +90,19 @@ function MyOrders() {
       <>
         <Navbar />
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <Empty 
-            description="Таны сагс хоосон байна" 
+          <Empty
+            description="Таны сагс хоосон байна"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             size="large"
             icon={<ShoppingCartOutlined />}
             className="mt-4"
-            onClick={() => {
-              const totalAmount = calculateTotal();
-              navigate('/qpay', { state: { amount: totalAmount } });
-            }}
+            style={{ backgroundColor: "#D81E1E", borderColor: "#D81E1E" }}
+            onClick={() => navigate("/")}
           >
-            Захиалга хийх
+            Бүтээгдэхүүн сонгох
           </Button>
         </div>
       </>
@@ -96,7 +116,6 @@ function MyOrders() {
           <Title level={2} className="!mb-0">
             Таны сагс
           </Title>
- 
         </div>
 
         <List
@@ -108,63 +127,81 @@ function MyOrders() {
 
             return (
               <List.Item key={index}>
-                <Card 
-                  bordered 
+                <Card
+                  bordered
                   className="hover:shadow-lg transition-shadow duration-300"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6">
+                  <Row align="middle" gutter={24}>
+                    <Col xs={24} sm={6}>
                       <img
                         src={order.image}
                         alt={order.name}
-                        width={120}
-                        height={120}
-                        style={{ objectFit: "cover", borderRadius: 8 }}
+                        style={{
+                          width: "100%",
+                          height: 120,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                        }}
                       />
-                      <div>
-                        <Text strong className="text-lg">{order.name}</Text>
-                        <br />
-                        <Text type="secondary" className="text-base">
-                          {order.price} × {order.quantity}
-                        </Text>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          icon={<MinusOutlined />}
-                          onClick={() => handleQuantityChange(order, order.quantity - 1)}
-                          disabled={order.quantity <= 1}
-                        />
-                        <Text strong className="text-lg min-w-[40px] text-center">
-                          {order.quantity}
-                        </Text>
-                        <Button 
-                          icon={<PlusOutlined />}
-                          onClick={() => handleQuantityChange(order, order.quantity + 1)}
-                        />
-                      </div>
-                      <Text strong className="text-lg min-w-[120px] text-right">
-                        {total.toLocaleString()}₮
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Title level={4} className="!mb-2">
+                        {order.name}
+                      </Title>
+                      <Text type="secondary" className="text-base">
+                        {order.price} × {order.quantity}
                       </Text>
-                      <div className="flex gap-2">
-                        <Button 
-                          type="primary" 
-                          icon={<EditOutlined />}
-                          onClick={() => handleEdit(order)}
-                        >
-                          Засах
-                        </Button>
-                        <Button 
-                          danger 
-                          icon={<DeleteOutlined />}
-                          onClick={() => handleDelete(order)}
-                        >
-                          Устгах
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Space
+                        direction="vertical"
+                        align="end"
+                        style={{ width: "100%" }}
+                      >
+                        <Space>
+                          <Button
+                            icon={<MinusOutlined />}
+                            onClick={() =>
+                              handleQuantityChange(order, order.quantity - 1)
+                            }
+                            disabled={order.quantity <= 1}
+                          />
+                          <Text
+                            strong
+                            className="text-lg min-w-[40px] text-center"
+                          >
+                            {order.quantity}
+                          </Text>
+                          <Button
+                            icon={<PlusOutlined />}
+                            onClick={() =>
+                              handleQuantityChange(order, order.quantity + 1)
+                            }
+                          />
+                        </Space>
+                        <Text strong className="text-lg">
+                          {total.toLocaleString()}₮
+                        </Text>
+                        <Space>
+                          <Button
+                            type="primary"
+                            icon={<EditOutlined />}
+                            style={{ backgroundColor: '#D81E1E', borderColor: '#D81E1E' }}
+                            onClick={() => handleEdit(order)}
+                          >
+                            Засах
+                          </Button>
+                          <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleDelete(order)}
+                          >
+                            Устгах
+                          </Button>
+                        </Space>
+                      </Space>
+                    </Col>
+                  </Row>
                 </Card>
               </List.Item>
             );
@@ -172,38 +209,44 @@ function MyOrders() {
         />
 
         <Card className="mt-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong className="text-lg">Нийт захиалга:</Text>
-              <Text className="ml-2">{orders.length} ширхэг</Text>
-            </div>
-            <div className="flex items-center gap-4">
-              <Text strong className="text-xl">Нийт дүн:</Text>
-              <Text strong className="text-2xl text-red-600">
-                {calculateTotal().toLocaleString()}₮
-              </Text>
-            </div>
-          </div>
+          <Row gutter={24} align="middle">
+            <Col xs={24} sm={12}>
+              <Statistic
+                title="Нийт захиалга"
+                value={orders.length}
+                suffix="ширхэг"
+              />
+            </Col>
+            <Col xs={24} sm={12}>
+              <Statistic
+                title="Нийт дүн"
+                value={calculateTotal()}
+                suffix="₮"
+                valueStyle={{ color: "#D81E1E" }}
+              />
+            </Col>
+          </Row>
           <Divider />
           <div className="flex justify-end gap-4">
-            <Button 
+            <Button
               size="large"
-              onClick={() => window.location.href = '/'}
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/")}
             >
-              Үргэлжлүүлэх
+              Буцах
             </Button>
-            <Button 
-            type="primary" 
-            size="large"
-            icon={<ShoppingCartOutlined />}
-            className="mt-4"
-            onClick={() => {
-              const totalAmount = calculateTotal();
-              navigate('/qpay', { state: { amount: totalAmount } });
-            }}
-          >
-            Захиалга хийх
-          </Button>
+            <Button
+              type="primary"
+              size="large"
+              style={{ backgroundColor: '#D81E1E', borderColor: '#D81E1E' }}
+              icon={<ShoppingCartOutlined />}
+              onClick={() => {
+                const totalAmount = calculateTotal();
+                navigate("/qpay", { state: { amount: totalAmount } });
+              }}
+            >
+              Захиалга хийх
+            </Button>
           </div>
         </Card>
       </div>
@@ -216,9 +259,14 @@ function MyOrders() {
         onCancel={() => setEditingOrder(null)}
         okText="Хадгалах"
         cancelText="Болих"
+        styles={{
+          mask: {
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          },
+        }}
       >
         {editingOrder && (
-          <div className="space-y-4">
+          <Space direction="vertical" style={{ width: "100%" }}>
             <div>
               <Text strong>Бүтээгдэхүүн:</Text>
               <Text className="ml-2">{editingOrder.name}</Text>
@@ -228,7 +276,9 @@ function MyOrders() {
               <InputNumber
                 min={1}
                 value={editingOrder.quantity}
-                onChange={(value) => setEditingOrder({ ...editingOrder, quantity: value })}
+                onChange={(value) =>
+                  setEditingOrder({ ...editingOrder, quantity: value })
+                }
                 className="ml-2"
               />
             </div>
@@ -239,10 +289,14 @@ function MyOrders() {
             <div>
               <Text strong>Нийт үнэ:</Text>
               <Text className="ml-2">
-                {(Number(editingOrder.price.replace(/[,₮]/g, "")) * editingOrder.quantity).toLocaleString()}₮
+                {(
+                  Number(editingOrder.price.replace(/[,₮]/g, "")) *
+                  editingOrder.quantity
+                ).toLocaleString()}
+                ₮
               </Text>
             </div>
-          </div>
+          </Space>
         )}
       </Modal>
 
@@ -254,8 +308,15 @@ function MyOrders() {
         onCancel={() => setDeleteConfirmOrder(null)}
         okText="Тийм"
         cancelText="Үгүй"
+        styles={{
+          mask: {
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          },
+        }}
       >
-        <p>Та {deleteConfirmOrder?.name} захиалгыг устгахдаа итгэлтэй байна уу?</p>
+        <p>
+          Та {deleteConfirmOrder?.name} захиалгыг устгахдаа итгэлтэй байна уу?
+        </p>
       </Modal>
     </>
   );

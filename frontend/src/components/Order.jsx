@@ -40,8 +40,7 @@ function Menu({ addOrder }) {
 
   const confirmAddToBasket = () => {
     if (selectedItem) {
-      addOrder(selectedItem);
-      console.log(`Added to basket: ${selectedItem.name}`);
+      addOrder(selectedItem, quantity);
       setShowConfirmDialog(false);
       setShowSuccess(true);
     }
@@ -211,9 +210,13 @@ function Menu({ addOrder }) {
           centered
           closable={false}
           bodyStyle={{ padding: 24, textAlign: "center" }}
-          maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          styles={{
+            mask: {
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            },
+          }}
         >
-          <Title level={3} style={{ color: "#4a934a", marginBottom: 16 }}>
+          <Title level={3} style={{ color: "#D81E1E", marginBottom: 16 }}>
             Сагсанд хийлээ
           </Title>
           <Paragraph style={{ marginBottom: 24 }}>
