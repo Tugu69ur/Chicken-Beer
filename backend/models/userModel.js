@@ -1,15 +1,12 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
   name: {
-    // Нэр
     type: String,
     required: true,
     trim: true,
   },
   phone: {
-    // Утасны дугаар
     type: String,
     required: true,
     trim: true,
@@ -28,7 +25,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["user", "admin", "client"],
-    default: "user",
+    default: "user", // <-- default role
   },
   createdAt: {
     type: Date,
@@ -36,6 +33,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
-
-export default User;
+// ✅ Force model overwrite in dev
+export default mongoose.models?.User
+  ? mongoose.model("User")
+  : mongoose.model("User", userSchema);
