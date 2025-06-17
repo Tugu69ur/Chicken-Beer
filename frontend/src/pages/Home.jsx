@@ -4,9 +4,10 @@ import logo2 from "../assets/logo2.png";
 import { useState, useEffect, useRef } from "react";
 import Order from "../components/Order";
 import Navbar from "../components/Navbar";
-import MyOrders from "../pages/MyOrders";
 import Footer from "../components/Footer.jsx";
-import { EnvironmentOutlined, GlobalOutlined } from "@ant-design/icons";
+import { EnvironmentOutlined } from "@ant-design/icons";
+import { Input, message } from "antd";
+import axios from "axios";
 
 const Home = () => {
   const images = [logo2, logo1, logo];
@@ -15,6 +16,36 @@ const Home = () => {
   const [basketCount, setBasketCount] = useState(0);
   const [orders, setOrders] = useState([]);
   const orderRef = useRef(null);
+  const [locationText, setLocationText] = useState("");
+  const savedLocation = localStorage.getItem("locationText");
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      message.error("Таны браузер байршил дэмжихгүй байна.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await axios.get(
+            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=80e27b99aa1f483cbd5a18415b749908&language=mn`
+          );
+
+          const address = response.data.results[0]?.formatted;
+          setLocationText(address || "Хаяг тодорхойлогдсонгүй");
+          localStorage.setItem("locationText", address || "Хаяг тодорхойлогдсонгүй");
+        } catch (error) {
+          message.error("Хаяг тодорхойлоход алдаа гарлаа.");
+        }
+      },
+      (error) => {
+        message.error("Байршил авахад алдаа гарлаа.");
+      }
+    );
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,7 +67,7 @@ const Home = () => {
 
       setTimeout(() => {
         window.scrollTo({ top: y, behavior: "smooth" });
-      }, 50); // slight delay
+      }, 50);
     }
   };
 
@@ -61,6 +92,7 @@ const Home = () => {
     const newCount = basketCount + quantity;
     localStorage.setItem("basketCount", newCount);
   };
+
   useEffect(() => {
     const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
     const savedCount = parseInt(localStorage.getItem("basketCount")) || 0;
@@ -99,16 +131,18 @@ const Home = () => {
           </div>
         )}
       </div>
-      <div className="h-24 w-full bg-slate-100 px-48 ">
+      <div className="h-24 w-full bg-slate-100 px-48 flex items-center gap-4">
         <EnvironmentOutlined
-          style={{ fontSize: "24px", color: "#ff4d4f", marginTop: "36px" }}
+          style={{ fontSize: "24px", color: "#ff4d4f", cursor: "pointer" }}
+          onClick={handleGetLocation}
         />
-        {/* <Input
-          placeholder="Орцны код"
+        <Input
+          placeholder="Байршил оруулах"
+          value={locationText || savedLocation || ""}
+          readOnly
+          bordered={true}
           required
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        /> */}
+        />
       </div>
       <div ref={orderRef} className="mt-[-40px]">
         <Order addOrder={addOrder} />

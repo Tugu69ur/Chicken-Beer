@@ -21,31 +21,31 @@ const userIcon = new L.Icon({
 
 const randomPlaces = [
   {
-    name: "Наран Молл",
-    position: [47.917, 106.906],
+    name: "King Tower",
+    position: [47.893925354729596, 106.92759180416523],
     img: place,
   },
   {
-    name: "Зайсан Хилл",
-    position: [47.879, 106.956],
+    name: "Цайз",
+    position: [47.92413876227514, 106.97895578393033],
     img: place,
   },
   {
-    name: "Баруун 4 зам",
-    position: [47.918, 106.895],
+    name: "Mongolian Academy of Science, Brain and Mind Research Institute",
+    position: [47.92586080411754, 106.88236932625958],
     img: place,
   },
-  {
-    name: "Шангри-Ла",
-    position: [47.92, 106.918],
-    img: place,
-  },
-  { name: "МУИС", position: [47.92, 106.915], img: place },
-  {
-    name: "Тэнгис кинотеатр",
-    position: [47.919, 106.917],
-    img: place,
-  },
+  // {
+  //   name: "Шангри-Ла",
+  //   position: [47.92, 106.918],
+  //   img: place,
+  // },
+  // { name: "МУИС", position: [47.92, 106.915], img: place },
+  // {
+  //   name: "Тэнгис кинотеатр",
+  //   position: [47.919, 106.917],
+  //   img: place,
+  // },
 ];
 
 export default function SimpleMap() {

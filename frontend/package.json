@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^8.8.3",
     "antd": "^5.25.4",
     "axios": "^1.9.0",
     "leaflet": "^1.9.4",
