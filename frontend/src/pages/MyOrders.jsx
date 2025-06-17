@@ -135,7 +135,7 @@ function MyOrders() {
             return (
               <List.Item key={index}>
                 <Card
-                  bordered
+                  variant="outlined"
                   className="hover:shadow-lg transition-shadow duration-300"
                 >
                   <Row align="middle" gutter={24}>

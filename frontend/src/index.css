@@ -62,3 +62,16 @@ html {
 .custom-search .ant-input-search-button svg {
   fill: white;
 }
+
+.ant-btn-primary {
+  background-color: #dc2626 !important; /* red-600 */
+  border-color: #dc2626 !important;
+  color: white !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #b91c1c !important; /* red-700 */
+  border-color: #b91c1c !important;
+  color: white !important;
+}

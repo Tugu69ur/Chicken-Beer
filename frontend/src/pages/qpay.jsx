@@ -1,27 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
+import { Button, Input, Radio, Tabs, Typography, Card, Divider } from "antd";
 import {
-  Button,
-  Input,
-  Radio,
-  Tabs,
-  Space,
-  Typography,
-  Card,
-  Divider,
-} from "antd";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  ShoppingCartOutlined,
-  PlusOutlined,
-  MinusOutlined,
   ArrowLeftOutlined,
   CreditCardOutlined,
   HomeOutlined,
 } from "@ant-design/icons";
 import Footer from "../components/Footer.jsx";
+
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
@@ -29,6 +16,33 @@ function Qpay() {
   const navigate = useNavigate();
   const [personType, setPersonType] = useState("individual");
   const [tab, setTab] = useState("home");
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
+  // Form inputs
+  const [phone, setPhone] = useState("");
+  const [entrance, setEntrance] = useState("");
+  const [code, setCode] = useState("");
+  const [door, setDoor] = useState("");
+  const [note, setNote] = useState("");
+  const [extraPhone, setExtraPhone] = useState("");
+
+  const logInfo = (paymentMethod) => {
+    setSelectedPayment(paymentMethod);
+    console.log(
+      "Selected Payment:",
+      paymentMethod === "qpay" ? "Qpay" : "Card"
+    );
+    console.log("Person Type:", personType);
+    console.log("Tab:", tab === "home" ? "Орон сууц" : "Оффис");
+    console.log({
+      phone,
+      entranceOrCompany: entrance,
+      code,
+      door,
+      note,
+      extraPhone,
+    });
+  };
 
   return (
     <>
@@ -46,9 +60,7 @@ function Qpay() {
           </Title>
         </div>
 
-        {/* Main Content */}
         <div className="flex flex-col md:flex-row gap-24 mt-10">
-          {/* Left Section - Form */}
           <div className="flex-1">
             <Title level={4}>
               <HomeOutlined className="mr-2" />
@@ -64,15 +76,51 @@ function Qpay() {
             </Tabs>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <Input placeholder="Утасны дугаар" required />
-              <Input placeholder="Орцны дугаар" />
-              <Input placeholder="Орцны код" required />
-              <Input placeholder="Хаалганы дугаар" />
+              <Input
+                placeholder="Утасны дугаар"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              {tab === "office" ? (
+                <Input
+                  placeholder="Байгууллагын нэр"
+                  value={entrance}
+                  onChange={(e) => setEntrance(e.target.value)}
+                />
+              ) : (
+                <Input
+                  placeholder="Орцны дугаар"
+                  value={entrance}
+                  onChange={(e) => setEntrance(e.target.value)}
+                />
+              )}
+              <Input
+                placeholder="Орцны код"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+              <Input
+                placeholder="Хаалганы дугаар"
+                value={door}
+                onChange={(e) => setDoor(e.target.value)}
+              />
             </div>
 
             <div className="mt-4">
-              <TextArea rows={2} placeholder="Хаягийн тайлбар" />
-              <Input className="mt-2" placeholder="Нэмэлт утасны дугаар" />
+              <TextArea
+                rows={2}
+                placeholder="Хаягийн тайлбар"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <Input
+                className="mt-2"
+                placeholder="Нэмэлт утасны дугаар"
+                value={extraPhone}
+                onChange={(e) => setExtraPhone(e.target.value)}
+              />
             </div>
 
             <div className="mt-6">
@@ -89,23 +137,30 @@ function Qpay() {
 
               <div className="flex gap-4 mt-4">
                 <Button
-                  type="default"
+                  type={selectedPayment === "qpay" ? "primary" : "default"}
+                  size="large"
+                  className={
+                    selectedPayment === "qpay" ? "bg-red-600 text-white" : ""
+                  }
+                  onClick={() => logInfo("qpay")}
+                >
+                  Qpay
+                </Button>
+                <Button
+                  type={selectedPayment === "card" ? "primary" : "default"}
                   icon={<CreditCardOutlined />}
                   size="large"
+                  className={
+                    selectedPayment === "card" ? "bg-red-600 text-white" : ""
+                  }
+                  onClick={() => logInfo("card")}
                 >
                   Карт
-                </Button>
-                <Button type="default" size="large">
-                  Social Pay
-                </Button>
-                <Button type="default" size="large">
-                  Monpay
                 </Button>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Cart Summary */}
           <Card className="w-full md:w-80" bordered>
             <Title level={5}>Таны бүтээгдэхүүн</Title>
             <div className="flex items-center">
@@ -136,14 +191,22 @@ function Qpay() {
 
             <div className="flex justify-between">
               <Text strong>Нийт</Text>
-              <Text strong className="text-red-600">40,000₮</Text>
+              <Text strong className="text-red-600">
+                40,000₮
+              </Text>
             </div>
-
             <Button
               type="primary"
               size="large"
               block
-              className="mt-4 bg-red-600"
+              className="mt-4"
+              onClick={() => {
+                if (!selectedPayment) {
+                  alert("Төлбөрийн хэлбэр сонгоно уу");
+                  return;
+                }
+                logInfo(selectedPayment);
+              }}
             >
               Төлбөр төлөх
             </Button>

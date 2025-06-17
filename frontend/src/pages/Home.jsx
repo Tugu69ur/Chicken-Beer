@@ -6,6 +6,7 @@ import Order from "../components/Order";
 import Navbar from "../components/Navbar";
 import MyOrders from "../pages/MyOrders";
 import Footer from "../components/Footer.jsx";
+import { EnvironmentOutlined, GlobalOutlined } from "@ant-design/icons";
 
 const Home = () => {
   const images = [logo2, logo1, logo];
@@ -98,7 +99,17 @@ const Home = () => {
           </div>
         )}
       </div>
-      <div className="h-24 w-full bg-slate-100"></div>
+      <div className="h-24 w-full bg-slate-100 px-48 ">
+        <EnvironmentOutlined
+          style={{ fontSize: "24px", color: "#ff4d4f", marginTop: "36px" }}
+        />
+        {/* <Input
+          placeholder="Орцны код"
+          required
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        /> */}
+      </div>
       <div ref={orderRef} className="mt-[-40px]">
         <Order addOrder={addOrder} />
       </div>

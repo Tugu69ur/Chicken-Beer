@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from "../../constants.js";
 import { useNavigate } from "react-router-dom";
 import icon from "../assets/cart.png";
-import { Modal, Row, Col, Button, Typography } from "antd";
+import { Modal, Row, Col, Button, Typography, message } from "antd";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -40,7 +40,7 @@ function Menu({ addOrder }) {
 
   const confirmAddToBasket = () => {
     if (selectedItem) {
-      addOrder(selectedItem, quantity);
+      addToCart(selectedItem);
       setShowConfirmDialog(false);
       setShowSuccess(true);
     }
@@ -53,6 +53,22 @@ function Menu({ addOrder }) {
 
   const handleGoToOrders = () => {
     navigate("/orders");
+  };
+  const addToCart = (product) => {
+    const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    const existingIndex = savedOrders.findIndex(
+      (item) => item.name === product.name
+    );
+
+    if (existingIndex !== -1) {
+      savedOrders[existingIndex].quantity += quantity;
+    } else {
+      savedOrders.push({ ...product, quantity: quantity });
+    }
+
+    localStorage.setItem("orders", JSON.stringify(savedOrders));
+    message.success("Сагсанд нэмэгдлээ");
   };
 
   useEffect(() => {
@@ -124,7 +140,9 @@ function Menu({ addOrder }) {
         footer={null}
         width={600}
         centered
-        bodyStyle={{ padding: 24 }}
+        styles={{
+          body: { padding: 24 },
+        }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img src={icon} alt={selectedItem?.name} className="w-6 h-6" />
@@ -209,8 +227,8 @@ function Menu({ addOrder }) {
           footer={null}
           centered
           closable={false}
-          bodyStyle={{ padding: 24, textAlign: "center" }}
           styles={{
+            body: { padding: 24, textAlign: "center" },
             mask: {
               backgroundColor: "rgba(0, 0, 0, 0.5)",
             },
