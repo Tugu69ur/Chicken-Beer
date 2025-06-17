@@ -7,7 +7,8 @@ const salt = bcrypt.genSaltSync(saltRounds);
 
 export const register = asyncHandler(async (req, res, next) => {
   try {
-    const { email, name, password, phone } = req.body;
+    const { email, name, password, phone, role } = req.body;
+    console.log("Register request body:", req.body);
 
     if (!email || !name || !password || !phone) {
       return res.status(400).json({
@@ -25,13 +26,15 @@ export const register = asyncHandler(async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, salt);
-
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       phone,
+      role, 
     });
+
+    console.log("✅ Saved user document:", user);
 
     res.status(201).json({
       success: true,
@@ -40,6 +43,7 @@ export const register = asyncHandler(async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        role:" user.role,",
       },
     });
   } catch (error) {

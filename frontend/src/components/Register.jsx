@@ -10,7 +10,8 @@ function Register() {
     phone: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'user'
   });
 
   const handleChange = (e) => {
@@ -42,7 +43,8 @@ function Register() {
           phone: '',
           email: '',
           password: '',
-          confirmPassword: ''
+          confirmPassword: '',
+          role: 'user'
         });
       } else {
         toast.error(data.message || "Бүртгэл амжилтгүй.");
