@@ -8,8 +8,6 @@ const salt = bcrypt.genSaltSync(saltRounds);
 export const register = asyncHandler(async (req, res, next) => {
   try {
     const { email, name, password, phone, role } = req.body;
-    console.log("Register request body:", req.body);
-
     if (!email || !name || !password || !phone) {
       return res.status(400).json({
         success: false,
@@ -34,8 +32,6 @@ export const register = asyncHandler(async (req, res, next) => {
       role, 
     });
 
-    console.log("✅ Saved user document:", user);
-
     res.status(201).json({
       success: true,
       data: {
@@ -43,7 +39,7 @@ export const register = asyncHandler(async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
-        role:" user.role,",
+        role: user.role,
       },
     });
   } catch (error) {
