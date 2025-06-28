@@ -4,13 +4,13 @@ import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 import { Button, Input, Radio, Tabs, Typography, Card, Divider } from "antd";
-import {
-  ArrowLeftOutlined,
-  HomeOutlined,
-} from "@ant-design/icons";
+import { ArrowLeftOutlined, HomeOutlined } from "@ant-design/icons";
+import { BASE_URL } from "../../constants.js";
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { order } from "../../../backend/controller/orderController.js";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -27,9 +27,29 @@ function Qpay() {
   const [code, setCode] = useState("");
   const [door, setDoor] = useState("");
   const [note, setNote] = useState("");
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          toast.error("Байршлыг тодорхойлох боломжгүй байна.");
+        }
+      );
+    } else {
+      toast.error("Таны браузер байршил дэмжихгүй байна.");
+    }
+  }, []);
+  const address =
+    latitude && longitude ? `${latitude}, ${longitude}` : "Байршил тодорхойгүй";
 
   const exchangeRate = 3500;
-  
+
   const totalAmount = orders.reduce((sum, item) => {
     const numericPrice = parseInt(item.price.replace(/[^\d]/g, ""), 10);
     return sum + numericPrice * item.quantity;
@@ -39,12 +59,10 @@ function Qpay() {
 
   const [extraPhone, setExtraPhone] = useState("");
   const location =
-    localStorage.getItem("locationText") || "Хаяг тодорхойлогдоогүй";
+    localStorage.getItem("locationText") || "Хаяг тодорхойлогдоогүй" + address;
 
   // Array of QR code image paths (update with your actual images)
-  const qpayQRCodes = [
-    "/qr.png",
-  ];
+  const qpayQRCodes = ["/qr.png"];
 
   // State to hold random QR code when qpay is selected
   const [randomQR, setRandomQR] = useState(null);
@@ -74,7 +92,7 @@ function Qpay() {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     if (selectedPayment === "paypal") {
@@ -82,7 +100,7 @@ function Qpay() {
       return;
     }
 
-    console.log({
+    const orderData = {
       phone,
       entranceOrCompany: entrance,
       code,
@@ -91,9 +109,38 @@ function Qpay() {
       extraPhone,
       paymentMethod: selectedPayment,
       personType,
-    });
+      address: location,
+      orders: orders.map((item) => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      })),
+    };
 
-    toast.success("Төлбөр амжилттай илгээгдлээ!");
+    try {
+      const res = await axios.post(`${BASE_URL}api/orders`, orderData);
+      if (res.data.success) {
+        toast.success("Төлбөр амжилттай илгээгдлээ!");
+        setTimeout(() => navigate("/"), 1500); // Wait 1.5 seconds
+        localStorage.removeItem("orders");
+        setPhone("");
+        setEntrance("");
+        setCode("");
+        setDoor("");
+        setNote("");
+        setExtraPhone("");
+        setSelectedPayment(null);
+        setPersonType("individual");
+        setTab("home");
+        setRandomQR(null);
+      } else {
+        toast.error("Алдаа гарлаа. Дахин оролдоно уу.");
+      }
+    } catch (err) {
+      console.error("Order submit error:", err);
+      toast.error("Сервертэй холбогдож чадсангүй.");
+    }
   };
 
   return (

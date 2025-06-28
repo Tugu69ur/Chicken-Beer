@@ -30,7 +30,7 @@ export const register = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
     phone,
-    
+    role: "user",
   });
 
 
@@ -41,6 +41,7 @@ export const register = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      role: user.role,
     },
   });
 });

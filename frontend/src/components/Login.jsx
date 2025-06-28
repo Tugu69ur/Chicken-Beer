@@ -11,7 +11,6 @@ function Login({ onClose }) {
     otp: "",
   });
 
-  // Control which step of reset password flow is shown
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
@@ -45,10 +44,16 @@ function Login({ onClose }) {
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("user", JSON.stringify(data.user));
-
         toast.success("Амжилттай нэвтэрлээ");
         onClose();
-        window.location.reload();
+        const role = data.user.role;
+        if (role === "admin") {
+          window.location.href = "/admin-dashboard";
+        } else if (role === "client") {
+          window.location.href = "/client-dashboard";
+        } else {
+          window.location.href = "/";
+        }
       } else {
         toast.error(data.message || "Нууц үг эсвэл утасны дугаар буруу байна");
       }

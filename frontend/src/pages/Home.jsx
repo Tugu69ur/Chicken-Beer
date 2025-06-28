@@ -28,15 +28,19 @@ const Home = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-
+        LocalStorage.setItem("latitude", latitude);
+        LocalStorage.setItem("longitude", longitude);
         try {
           const response = await axios.get(
-            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=80e27b99aa1f483cbd5a18415b749908&language=mn`
+            `https://api.opencagedata.com/geocode/v1/json?q=${47.92139043875632}+${106.97956765120384}&key=80e27b99aa1f483cbd5a18415b749908&language=mn`
           );
 
           const address = response.data.results[0]?.formatted;
           setLocationText(address || "Хаяг тодорхойлогдсонгүй");
-          localStorage.setItem("locationText", address || "Хаяг тодорхойлогдсонгүй");
+          localStorage.setItem(
+            "locationText",
+            address || "Хаяг тодорхойлогдсонгүй"
+          );
         } catch (error) {
           message.error("Хаяг тодорхойлоход алдаа гарлаа.");
         }

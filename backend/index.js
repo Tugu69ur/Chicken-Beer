@@ -6,6 +6,7 @@ import loginRoutes from "./routes/login_routes.js";
 import menuRoutes from "./routes/menu_routes.js";
 import qpayRoutes from "./routes/qpay_routes.js";
 import otpRoutes from "./routes/authRoutes.js";
+import orderRoutes from "./routes/order_routes.js";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
@@ -32,6 +33,7 @@ app.use("/api/login", loginRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/qpay", qpayRoutes);
 app.use("/api/otp", otpRoutes);
+app.use("/api/orders", orderRoutes);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
