@@ -6,7 +6,7 @@ import Order from "../components/Order";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer.jsx";
 import { EnvironmentOutlined } from "@ant-design/icons";
-import { Input, message } from "antd";
+import { Input, message, Button } from "antd";
 import axios from "axios";
 
 const Home = () => {
@@ -18,6 +18,7 @@ const Home = () => {
   const orderRef = useRef(null);
   const [locationText, setLocationText] = useState("");
   const savedLocation = localStorage.getItem("locationText");
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -144,9 +145,32 @@ const Home = () => {
           placeholder="Байршил оруулах"
           value={locationText || savedLocation || ""}
           readOnly
-          bordered={true}
+          bordered
           required
+          className="w-72"
         />
+        <Button
+          type="default"
+          onClick={() => setSelectedOption("pickup")}
+          className={`rounded-xl px-6 py-1 text-sm ${
+            selectedOption === "pickup"
+              ? "bg-red-500 text-white"
+              : "bg-white text-black border"
+          }`}
+        >
+          Очиж авах
+        </Button>
+        <Button
+          type="default"
+          onClick={() => setSelectedOption("delivery")}
+          className={`rounded-xl px-6 py-1 text-sm ${
+            selectedOption === "delivery"
+              ? "bg-red-500 text-white"
+              : "bg-white text-black border"
+          }`}
+        >
+          Хүргэлт
+        </Button>
       </div>
       <div ref={orderRef} className="mt-[-40px]">
         <Order addOrder={addOrder} />
