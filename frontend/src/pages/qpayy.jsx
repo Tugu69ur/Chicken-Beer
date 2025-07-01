@@ -5,65 +5,48 @@ import Footer from "../components/Footer.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { Button, Input, Radio, Tabs, Typography, Card, Divider } from "antd";
+import { Button, Input, Radio, Typography, Card, Divider, Select } from "antd";
 import { ArrowLeftOutlined, HomeOutlined } from "@ant-design/icons";
 import { BASE_URL } from "../../constants.js";
-
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
+const { Option } = Select;
+
+function generatePickupTimes() {
+  const times = [];
+  const now = new Date();
+  let currentMinutes = now.getHours() * 60 + now.getMinutes();
+  currentMinutes = Math.ceil(currentMinutes / 15) * 15;
+
+  const start = Math.max(currentMinutes, 9 * 60); 
+  const end = 20 * 60; // 8:00 PM
+
+  for (let t = start; t <= end; t += 15) {
+    const hours = Math.floor(t / 60);
+    const minutes = t % 60;
+    const label = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}`;
+    times.push(label);
+  }
+
+  return times;
+}
 
 function Qpay() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("home");
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [personType, setPersonType] = useState("individual");
 
   const orders = JSON.parse(localStorage.getItem("orders")) || [];
-  const [phone, setPhone] = useState("");
-  const [entrance, setEntrance] = useState("");
-  const [code, setCode] = useState("");
-  const [door, setDoor] = useState("");
-  const [note, setNote] = useState("");
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          toast.error("Байршлыг тодорхойлох боломжгүй байна.");
-        }
-      );
-    } else {
-      toast.error("Таны браузер байршил дэмжихгүй байна.");
-    }
-  }, []);
-  const address =
-    latitude && longitude ? `${latitude}, ${longitude}` : "Байршил тодорхойгүй";
-
-  const exchangeRate = 3500;
-
-  const totalAmount = orders.reduce((sum, item) => {
-    const numericPrice = parseInt(item.price.replace(/[^\d]/g, ""), 10);
-    return sum + numericPrice * item.quantity;
-  }, 0);
-
-  const amountUSD = (totalAmount / exchangeRate).toFixed(2);
-
+  const [note, setNote] = useState(undefined);
   const [extraPhone, setExtraPhone] = useState("");
-  const location =
-    localStorage.getItem("locationText") || "Хаяг тодорхойлогдоогүй" + address;
-
-  // Array of QR code image paths (update with your actual images)
+  const location = localStorage.getItem("selectedBranch");
+  const branch = JSON.parse(location);
   const qpayQRCodes = ["/qr.png"];
-
-  // State to hold random QR code when qpay is selected
   const [randomQR, setRandomQR] = useState(null);
 
   useEffect(() => {
@@ -76,7 +59,7 @@ function Qpay() {
   }, [selectedPayment]);
 
   const validateForm = () => {
-    if (!phone || !entrance || !code || !door) {
+    if (!extraPhone || !note ) {
       toast.error("Бүх талбарыг бүрэн бөглөнө үү");
       return false;
     }
@@ -91,6 +74,13 @@ function Qpay() {
     return true;
   };
 
+  const totalAmount = orders.reduce((sum, item) => {
+    const numericPrice = parseInt(item.price.replace(/[^\d]/g, ""), 10);
+    return sum + numericPrice * item.quantity;
+  }, 0);
+
+  const amountUSD = (totalAmount / 3500).toFixed(2);
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -100,15 +90,11 @@ function Qpay() {
     }
 
     const orderData = {
-      phone,
-      entranceOrCompany: entrance,
-      code,
-      door,
       note,
       extraPhone,
       paymentMethod: selectedPayment,
       personType,
-      address: location,
+      address: branch.name,
       orders: orders.map((item) => ({
         name: item.name,
         price: item.price,
@@ -118,20 +104,15 @@ function Qpay() {
     };
 
     try {
-      const res = await axios.post(`${BASE_URL}api/orders`, orderData);
-      if (res.data.success) {
+      const res = await axios.post(`${BASE_URL}api/orderss`, orderData);
+      if (res.status === 201 || res.data.success) {
         toast.success("Төлбөр амжилттай илгээгдлээ!");
-        setTimeout(() => navigate("/"), 1500); // Wait 1.5 seconds
+        setTimeout(() => navigate("/"), 1500);
         localStorage.removeItem("orders");
-        setPhone("");
-        setEntrance("");
-        setCode("");
-        setDoor("");
         setNote("");
         setExtraPhone("");
         setSelectedPayment(null);
         setPersonType("individual");
-        setTab("home");
         setRandomQR(null);
       } else {
         toast.error("Алдаа гарлаа. Дахин оролдоно уу.");
@@ -162,63 +143,31 @@ function Qpay() {
           <div className="flex-1">
             <Title level={4}>
               <HomeOutlined className="mr-2" />
-              Хүргэлтийн захиалга
+              Очиж авах захиалга
             </Title>
 
             <Text strong>Хаяг: </Text>
-            <Text>{location}</Text>
+            <Text>{branch.name}</Text>
 
-            <Tabs activeKey={tab} onChange={setTab} className="mt-2">
-              <Tabs.TabPane tab="Орон сууц" key="home" />
-              <Tabs.TabPane tab="Оффис" key="office" />
-            </Tabs>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="mt-4 space-y-3">
               <Input
                 placeholder="Утасны дугаар"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              {tab === "office" ? (
-                <Input
-                  placeholder="Байгууллагын нэр"
-                  value={entrance}
-                  onChange={(e) => setEntrance(e.target.value)}
-                />
-              ) : (
-                <Input
-                  placeholder="Орцны дугаар"
-                  value={entrance}
-                  onChange={(e) => setEntrance(e.target.value)}
-                />
-              )}
-              <Input
-                placeholder="Орцны код"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-              <Input
-                placeholder="Хаалганы дугаар"
-                value={door}
-                onChange={(e) => setDoor(e.target.value)}
-              />
-            </div>
-
-            <div className="mt-4">
-              <TextArea
-                rows={2}
-                placeholder="Хаягийн тайлбар"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-              <Input
-                className="mt-2"
-                placeholder="Нэмэлт утасны дугаар"
                 value={extraPhone}
                 onChange={(e) => setExtraPhone(e.target.value)}
               />
+
+              <Select
+                className="w-full"
+                placeholder="Очиж авах цаг"
+                value={note}
+                onChange={(value) => setNote(value)}
+              >
+                {generatePickupTimes().map((time) => (
+                  <Option key={time} value={time}>
+                    {time}
+                  </Option>
+                ))}
+              </Select>
             </div>
 
             {/* Person Type */}
@@ -249,7 +198,6 @@ function Qpay() {
                 >
                   Qpay
                 </Button>
-
                 <Button
                   type={selectedPayment === "paypal" ? "primary" : "default"}
                   size="large"
@@ -265,7 +213,6 @@ function Qpay() {
               </div>
             </div>
 
-            {/* Show random QR code when Qpay is selected */}
             {selectedPayment === "qpay" && randomQR && (
               <div className="mt-6 flex justify-center">
                 <img
@@ -276,7 +223,6 @@ function Qpay() {
               </div>
             )}
 
-            {/* PayPal Buttons */}
             {selectedPayment === "paypal" && (
               <div className="mt-6">
                 <PayPalScriptProvider
@@ -315,7 +261,6 @@ function Qpay() {
               </div>
             )}
 
-            {/* Submit button for other payment methods */}
             {selectedPayment !== "paypal" && (
               <Button
                 type="primary"
@@ -331,7 +276,6 @@ function Qpay() {
 
           <Card className="w-full md:w-80" bordered>
             <Title level={5}>Таны бүтээгдэхүүн</Title>
-
             {orders.length === 0 ? (
               <Text>Сагс хоосон байна.</Text>
             ) : (
@@ -351,9 +295,7 @@ function Qpay() {
                 </div>
               ))
             )}
-
             <Divider />
-
             <div className="flex justify-between">
               <Text>Хүргэлтийн үнэ</Text>
               <Text>0₮</Text>
@@ -362,9 +304,7 @@ function Qpay() {
               <Text>Купон</Text>
               <Text>0₮</Text>
             </div>
-
             <Divider />
-
             <div className="flex justify-between">
               <Text strong>Нийт</Text>
               <Text strong className="text-red-600">
@@ -376,7 +316,6 @@ function Qpay() {
       </div>
 
       <ToastContainer position="top-right" autoClose={3000} />
-
       <Footer />
     </>
   );

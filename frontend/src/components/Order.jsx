@@ -2,9 +2,23 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from "../../constants.js";
 import { useNavigate } from "react-router-dom";
 import icon from "../assets/cart.png";
-import { Modal, Row, Col, Button, Typography, message } from "antd";
+import { Modal, Row, Col, Button, Typography } from "antd";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const { Title, Text, Paragraph } = Typography;
+
+// Safe parse helper for selectedBranch
+function safeParseSelectedBranch() {
+  const val = localStorage.getItem("selectedBranch");
+  if (!val) return null;
+
+  try {
+    return JSON.parse(val);
+  } catch {
+    return { name: val };
+  }
+}
 
 function groupByCategory(items) {
   const grouped = {};
@@ -21,6 +35,7 @@ function Menu({ addOrder }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [loginPrompt, setLoginPrompt] = useState(false);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () =>
@@ -33,7 +48,32 @@ function Menu({ addOrder }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
+  const selectedOption = localStorage.getItem("orderOption") || "delivery";
+  const selectedBranch = safeParseSelectedBranch();
+  const locationText = localStorage.getItem("locationText") || "";
+
   const handleAddToBasket = (item) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setLoginPrompt(true);
+      return;
+    }
+
+    if (selectedOption === "pickup" && !selectedBranch) {
+      toast.error("Салбар сонгоогүй байна. Салбар сонгоно уу.");
+      return;
+    }
+
+    if (
+      selectedOption === "delivery" &&
+      (!locationText || locationText.trim() === "")
+    ) {
+      toast.error(
+        "Байршил тодорхойлогдоогүй байна. Байршил авах эсвэл оруулна уу."
+      );
+      return;
+    }
+
     setSelectedItem(item);
     setShowConfirmDialog(true);
   };
@@ -54,6 +94,7 @@ function Menu({ addOrder }) {
   const handleGoToOrders = () => {
     navigate("/orders");
   };
+
   const addToCart = (product) => {
     const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
@@ -66,9 +107,8 @@ function Menu({ addOrder }) {
     } else {
       savedOrders.push({ ...product, quantity: quantity });
     }
-
     localStorage.setItem("orders", JSON.stringify(savedOrders));
-    message.success("Сагсанд нэмэгдлээ");
+    toast.success("Сагсанд нэмэгдлээ");
   };
 
   useEffect(() => {
@@ -117,7 +157,6 @@ function Menu({ addOrder }) {
                   <p className="text-red-600 font-bold text-2xl">
                     {item.price}
                   </p>
-
                   <div className="mt-[-20px] opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-40 transition-all duration-300 overflow-hidden">
                     <p className="text-sm text-gray-600">{item.description}</p>
                     <button
@@ -133,6 +172,29 @@ function Menu({ addOrder }) {
           </div>
         </div>
       ))}
+
+      <Modal
+        open={loginPrompt}
+        footer={null}
+        centered
+        onCancel={() => setLoginPrompt(false)}
+        styles={{
+          body: { padding: 24, textAlign: "center" },
+        }}
+      >
+        <Title level={4}>Нэвтрэх шаардлагатай</Title>
+        <Paragraph>Үргэлжлэхийн тулд эхлээд нэвтэрнэ үү.</Paragraph>
+        <Button
+          type="primary"
+          danger
+          onClick={() => {
+            setLoginPrompt(false);
+            navigate("/");
+          }}
+        >
+          Нэвтрэх
+        </Button>
+      </Modal>
 
       <Modal
         open={showConfirmDialog}
@@ -220,7 +282,6 @@ function Menu({ addOrder }) {
       </Modal>
 
       {/* Success Dialog */}
-
       {showSuccess && (
         <Modal
           open={showSuccess}
@@ -250,6 +311,9 @@ function Menu({ addOrder }) {
           </div>
         </Modal>
       )}
+
+      {/* Toast container to display toast notifications */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

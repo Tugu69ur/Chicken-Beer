@@ -235,7 +235,10 @@ function MyOrders() {
               icon={<ShoppingCartOutlined />}
               onClick={() => {
                 const totalAmount = calculateTotal();
-                navigate("/qpay", { state: { amount: totalAmount } });
+                const orderOption =
+                  localStorage.getItem("orderOption") || "delivery";
+                const route = orderOption === "delivery" ? "/qpay" : "/qpayy";
+                navigate(route, { state: { amount: totalAmount } });
               }}
             >
               Захиалга хийх

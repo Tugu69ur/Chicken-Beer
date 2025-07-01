@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import icon from "../assets/real.png";
-import place from "../assets/logo1.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import { Row, Col, Card, Input } from "antd";
 import Navbar from "../components/Navbar";
+import axios from 'axios';
+import { BASE_URL } from "../../constants.js";
 
 const { Search } = Input;
 
@@ -19,44 +20,29 @@ const userIcon = new L.Icon({
   className: "round-icon",
 });
 
-const randomPlaces = [
-  {
-    name: "King Tower",
-    position: [47.893925354729596, 106.92759180416523],
-    img: place,
-  },
-  {
-    name: "Цайз",
-    position: [47.92413876227514, 106.97895578393033],
-    img: place,
-  },
-  {
-    name: "Mongolian Academy of Science, Brain and Mind Research Institute",
-    position: [47.92586080411754, 106.88236932625958],
-    img: place,
-  },
-  // {
-  //   name: "Шангри-Ла",
-  //   position: [47.92, 106.918],
-  //   img: place,
-  // },
-  // { name: "МУИС", position: [47.92, 106.915], img: place },
-  // {
-  //   name: "Тэнгис кинотеатр",
-  //   position: [47.919, 106.917],
-  //   img: place,
-  // },
-];
-
 export default function SimpleMap() {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const [center] = useState([47.9181, 106.9175]);
   const [searchText, setSearchText] = useState("");
+  const [branches, setBranches] = useState([]);
 
-  const filteredPlaces = randomPlaces.filter((place) =>
+  const filteredPlaces = branches.filter((place) =>
     place.name.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}api/branches`);
+        setBranches(response.data);
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+      }
+    };
+
+    fetchBranches();
+  }, []);
 
   useEffect(() => {
     if (!mapInstance.current && mapRef.current) {
@@ -70,7 +56,7 @@ export default function SimpleMap() {
         attribution: "© OpenStreetMap contributors",
       }).addTo(mapInstance.current);
 
-      randomPlaces.forEach((place) => {
+      branches.forEach((place) => {
         const popupContent = `
             <div style="text-align:center; max-width:200px;">
       <h3>${place.name}</h3>
@@ -99,7 +85,7 @@ export default function SimpleMap() {
         mapInstance.current = null;
       }
     };
-  }, []);
+  }, [branches]);
 
   return (
     <>
