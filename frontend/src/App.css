@@ -44,9 +44,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* App.css or index.css */
-@import "leaflet/dist/leaflet.css";
-
 .custom-search .ant-input {
   border: 1px solid #D81E1E;
   border-radius: 8px;

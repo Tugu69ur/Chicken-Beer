@@ -1,9 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
 
+@import "leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 body {
   margin: 0;
@@ -21,8 +23,6 @@ html {
   border: 2px solid white;
 }
 
-/* App.css or index.css */
-@import "leaflet/dist/leaflet.css";
 
 .custom-search .ant-input {
   border-radius: 4px 0 0 4px;
