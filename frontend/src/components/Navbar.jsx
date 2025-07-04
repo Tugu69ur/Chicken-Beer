@@ -23,7 +23,9 @@ function Navbar({ basketCount, orders }) {
       <nav className="font-manrope bg-[#F9F9F9] h-2xl shadow-md w-full">
         <div
           className={`mx-auto px-4 py-3 flex justify-between items-center ${
-            user?.role === "client" ? "max-w-4xl" : "max-w-2xl"
+            user?.role === "admin" || user?.role === "client"
+              ? "max-w-4xl"
+              : "max-w-2xl"
           }`}
         >
           <Link to="/">
@@ -53,8 +55,41 @@ function Navbar({ basketCount, orders }) {
                     Түүхий эд захиалга
                   </Link>
                 </>
+              ) : user.role === "admin" ? (
+                <>
+                  <Link
+                    to="/admin-dashboard"
+                    className="text-gray-700 hover:text-[#D81E1E]"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/manage-admins"
+                    className="text-gray-700 hover:text-[#D81E1E]"
+                  >
+                    Admins
+                  </Link>
+                  <Link
+                    to="/manage-clients"
+                    className="text-gray-700 hover:text-[#D81E1E]"
+                  >
+                    Clients
+                  </Link>
+                  <Link
+                    to="/admin-menu"
+                    className="text-gray-700 hover:text-[#D81E1E]"
+                  >
+                    Menu
+                  </Link>
+                  <Link
+                    to="/admin-branchs"
+                    className="text-gray-700 hover:text-[#D81E1E]"
+                  >
+                    Branchs
+                  </Link>
+                </>
               ) : (
-                // Default user/admin links
+                // Other logged-in users
                 <>
                   <Link to="/" className="text-gray-700 hover:text-[#D81E1E]">
                     Меню

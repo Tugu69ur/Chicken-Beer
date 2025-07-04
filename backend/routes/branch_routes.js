@@ -1,21 +1,24 @@
-import express from 'express';
-import { createBranch, getAllBranches, getBranchById, updateBranch, deleteBranch } from '../controller/branch_contoller.js';
+import express from "express";
+import {
+  createBranch,
+  getAllBranches,
+  getBranchById,
+  updateBranch,
+  deleteBranch,
+} from "../controller/branch_contoller.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { authorizeRoles } from "../middleware/authorizeRole.js";
 
 const router = express.Router();
 
-// Create a new branch
-router.post('/', createBranch);
+router.post("/", protect, authorizeRoles("admin", "client"), createBranch);
 
-// Get all branches
-router.get('/', getAllBranches);
+router.get("/", getAllBranches);
 
-// Get a branch by ID
-router.get('/:id', getBranchById);
+router.get("/:id", getBranchById);
 
-// Update a branch
-router.put('/:id', updateBranch);
+router.put("/:id", protect, authorizeRoles("admin", "client"), updateBranch);
 
-// Delete a branch
-router.delete('/:id', deleteBranch);
+router.delete("/:id", protect, authorizeRoles("admin", "client"), deleteBranch);
 
 export default router;
