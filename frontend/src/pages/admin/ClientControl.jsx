@@ -32,19 +32,32 @@ const ManageClients = () => {
     const fetchBranches = async () => {
       try {
         const response = await axios.get(`${BASE_URL}api/branches`);
-        setBranches(response.data);
+        const branchData = response.data;
+        setBranches(branchData);
       } catch (error) {
         console.error("Failed to fetch branches", error);
       }
     };
-    fetchBranches();
+
+    fetchBranches(); // <- call it inside useEffect
   }, []);
 
   const fetchClients = async () => {
     try {
       setLoadingClients(true);
-      const res = await axios.get(`${BASE_URL}api/clients`);
-      setClients(res.data);
+      const res = await axios.get(`${BASE_URL}api/users`);
+      const users = res.data.users || [];
+      // Filter only client users
+      const clientUsers = users.filter((user) => user.role === "client");
+      // Map to include only necessary fields
+      const clientData = clientUsers.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        branch: user.branch || [],
+      }));
+      setClients(clientData);
     } catch (err) {
       notification.error({
         message: "Алдаа",
@@ -62,7 +75,15 @@ const ManageClients = () => {
   const handleAddClient = async (values) => {
     try {
       setAddingClient(true);
-      await axios.post(`${BASE_URL}api/clients`, values);
+      await axios.post(`${BASE_URL}api/users`, {
+        name: values.name,
+        phone: values.phone,
+        email: values.email,
+        password: values.password,
+        role: "client",
+        branch: values.branch,
+      }
+      );
       notification.success({
         message: "Амжилттай!",
         description: "Үйлчлүүлэгч амжилттай нэмэгдлээ.",
@@ -107,9 +128,15 @@ const ManageClients = () => {
   const clientColumns = [
     {
       title: "Нэр",
-      dataIndex: "firstName",
+      dataIndex: "name",
       key: "name",
-      render: (_, record) => `${record.firstName} ${record.lastName}`,
+      render: (_, record) => `${record.name}`,
+    },
+    {
+      title: "Утас",
+      dataIndex: "phone",
+      key: "phone",
+      render: (_, record) => `${record.phone || "Утас оруулаагүй"}`,
     },
     {
       title: "Имэйл",
@@ -117,10 +144,10 @@ const ManageClients = () => {
       key: "email",
     },
     {
-      title: "Үйлчилгээнүүд",
-      dataIndex: "services",
-      key: "services",
-      render: (services) => services?.join(", "),
+      title: "Салбар",
+      dataIndex: "branch",
+      key: "branch",
+      render: (_, record) => `${record.branch}`,
     },
     {
       title: "Үйлдэл",
@@ -153,7 +180,7 @@ const ManageClients = () => {
                   <Col span={12}>
                     <Form.Item
                       label="Нэр"
-                      name="firstName"
+                      name="name"
                       rules={[{ required: true, message: "Нэр оруулна уу!" }]}
                     >
                       <Input placeholder="Жишээ: Бат" />
@@ -161,11 +188,11 @@ const ManageClients = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item
-                      label="Овог"
-                      name="lastName"
-                      rules={[{ required: true, message: "Овог оруулна уу!" }]}
+                      label="phone"
+                      name="phone"
+                      rules={[{ required: true, message: "Утасны дугаар оруулна уу!" }]}
                     >
-                      <Input placeholder="Жишээ: Дорж" />
+                      <Input placeholder="Жишээ: 99119911" />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -199,7 +226,7 @@ const ManageClients = () => {
                 >
                   <Select placeholder="Салбар сонгох">
                     {branches.map((branch) => (
-                      <Option key={branch._id} value={branch._id}>
+                      <Option key={branch._id} value={branch.name}>
                         {branch.name}
                       </Option>
                     ))}

@@ -17,6 +17,9 @@ import { ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { BASE_URL } from "../../../constants.js";
 import Navbar from "../../components/Navbar.jsx";
+import { ToastContainer, toast } from "react-toastify";
+
+
 
 const { Title } = Typography;
 const { confirm } = Modal;
@@ -30,8 +33,20 @@ const ManageAdmins = () => {
   const fetchAdmins = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}api/admins`);
-      setAdmins(res.data);
+      const res = await axios.get(`${BASE_URL}api/users`);
+      const users = res.data.users || [];
+      // Filter only admin users
+      const adminUsers = users.filter((user) => user.role === "admin");
+      // Map to include only necessary fields
+      const adminData = adminUsers.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      }));
+      // Set the state with admin data
+
+      setAdmins(adminData);
     } catch (error) {
       notification.error({ message: "Алдаа", description: "Админуудыг татаж чадсангүй." });
     } finally {
@@ -43,24 +58,30 @@ const ManageAdmins = () => {
     fetchAdmins();
   }, []);
 
-  const handleAddAdmin = async (values) => {
-    setAddingAdmin(true);
-    try {
-      await axios.post(`${BASE_URL}api/admins`, values);
-      notification.success({ message: "Амжилттай!", description: "Шинэ админ нэмэгдлээ." });
-      form.resetFields();
-      fetchAdmins();
-    } catch (error) {
-      const msg = error.response?.data?.message || error.message;
-      notification.error({ message: "Алдаа", description: msg });
-    } finally {
-      setAddingAdmin(false);
-    }
-  };
+const handleAddAdmin = async (values) => {
+  setAddingAdmin(true);
+  try {
+    await axios.post(`${BASE_URL}api/users`, {
+      name: values.firstName,
+      phone: values.phone,
+      email: values.email,
+      password: values.password,
+      role: "admin",
+    });
+    notification.success({ message: "Амжилттай!", description: "Шинэ админ нэмэгдлээ." });
+    form.resetFields();
+    fetchAdmins();
+  } catch (error) {
+    const msg = error.response?.data?.message || error.message;
+    notification.error({ message: "Алдаа", description: msg });
+  } finally {
+    setAddingAdmin(false);
+  }
+};
 
   const handleDeleteAdmin = async (adminId) => {
     try {
-      await axios.delete(`${BASE_URL}api/admins/${adminId}`);
+      await axios.delete(`${BASE_URL}api/users/${adminId}`);
       notification.success({ message: "Устгасан!", description: "Админ устгагдлаа." });
       fetchAdmins();
     } catch (error) {
@@ -85,9 +106,9 @@ const ManageAdmins = () => {
   const columns = [
     {
       title: "Нэр",
-      dataIndex: "firstName",
+      dataIndex: "name",
       key: "name",
-      render: (text, record) => `${record.firstName} ${record.lastName}`,
+      render: (text, record) => `${record.name}`,
     },
     {
       title: "Имэйл",
@@ -95,10 +116,16 @@ const ManageAdmins = () => {
       key: "email",
     },
     {
+      title: "Утас",
+      dataIndex: "phone",
+      key: "phone",
+      render: (text, record) => `${record.phone}`,
+    },
+    {
       title: "Үйлдэл",
       key: "action",
       render: (_, record) => (
-        <Button danger onClick={() => showDeleteConfirm(record._id, record.firstName)}>
+        <Button danger onClick={() => showDeleteConfirm(record._id, record.name)}>
           Устгах
         </Button>
       ),
@@ -119,7 +146,7 @@ const ManageAdmins = () => {
                 <Col span={12}>
                   <Form.Item
                     label="Нэр"
-                    name="firstName"
+                    name="name"
                     rules={[{ required: true, message: "Нэр оруулна уу!" }]}
                   >
                     <Input placeholder="Жишээ: Бат" />

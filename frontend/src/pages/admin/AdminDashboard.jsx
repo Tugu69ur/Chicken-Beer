@@ -52,6 +52,8 @@ const AdminDashboard = () => {
 
   const [ordersCount, setOrdersCount] = useState(0);
   const [revenueAmount, setRevenueAmount] = useState(0);
+  const [adminsCount, setAdminsCount] = useState(0);
+  const [clientsCount, setClientsCount] = useState(0);
 
   const formatRevenue = (amount) => {
     return amount.toLocaleString("en-US") + "₮";
@@ -59,14 +61,20 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [res1, res2] = await Promise.all([
+      const [res1, res2, res3] = await Promise.all([
         axios.get(`${BASE_URL}api/orders`),
         axios.get(`${BASE_URL}api/orderss`),
+        axios.get(`${BASE_URL}api/users`),
       ]);
 
       const result1 = parseOrdersData(res1.data.orders);
       const result2 = parseOrdersData(res2.data);
+      const users = res3.data.users || [];
 
+      const adminsCount = users.filter((user) => user.role === "admin").length;
+      const clientsCount = users.filter((user) => user.role === "client").length;
+      setAdminsCount(adminsCount);
+      setClientsCount(clientsCount);
       setOrdersCount(result1.count + result2.count);
       setRevenueAmount(result1.revenue + result2.revenue);
     } catch (error) {
@@ -135,7 +143,7 @@ const AdminDashboard = () => {
   return (
     <>
       <Navbar />
-      <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }} className="mx-auto">
+      <Layout>
         <Layout>
           <Header
             style={{
@@ -151,7 +159,7 @@ const AdminDashboard = () => {
               justifyContent: "center",
             }}
           >
-            <div style={{ maxWidth: 1400, width: "100%" }}>
+            <div style={{ maxWidth: 1400, width: "100%", marginLeft: '200px' }} className="mx-auto">
               <Row gutter={[24, 24]}>
                 {/* Total Orders */}
                 <Col xs={24} sm={12} md={6}>
@@ -204,7 +212,7 @@ const AdminDashboard = () => {
                         display: "block",
                       }}
                     >
-                      4
+                      {adminsCount}
                     </Text>
                     <Progress {...progressConfig(40)} />
                   </Card>
@@ -226,7 +234,7 @@ const AdminDashboard = () => {
                         display: "block",
                       }}
                     >
-                      860
+                      {clientsCount}
                     </Text>
                     <Progress {...progressConfig(86)} />
                   </Card>

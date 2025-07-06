@@ -13,6 +13,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import branchRoutes from './routes/branch_routes.js';
 import bandiRoutes from './routes/bandi_routes.js';
+import userRoutes from './routes/userRoutes.js';
+
 
 dotenv.config();
 connectDB();
@@ -38,7 +40,7 @@ app.use("/api/otp", otpRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/branches", branchRoutes);
 app.use('/api/orderss', bandiRoutes);
-
+app.use('/api/users', userRoutes);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
