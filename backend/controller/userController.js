@@ -10,7 +10,7 @@ export const createUser = async (req, res) => {
       email,
       password,
       role,
-      branch, // Assuming branch is a string or an array of strings
+      branch,
     });
 
     await newUser.save();

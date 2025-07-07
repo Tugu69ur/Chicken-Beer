@@ -17,9 +17,7 @@ import { ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { BASE_URL } from "../../../constants.js";
 import Navbar from "../../components/Navbar.jsx";
-import { ToastContainer, toast } from "react-toastify";
-
-
+import { toast } from "react-toastify";
 
 const { Title } = Typography;
 const { confirm } = Modal;
@@ -62,13 +60,13 @@ const handleAddAdmin = async (values) => {
   setAddingAdmin(true);
   try {
     await axios.post(`${BASE_URL}api/users`, {
-      name: values.firstName,
+      name: values.name,
       phone: values.phone,
       email: values.email,
       password: values.password,
       role: "admin",
     });
-    notification.success({ message: "Амжилттай!", description: "Шинэ админ нэмэгдлээ." });
+    toast.success( "Шинэ админ нэмэгдлээ.");
     form.resetFields();
     fetchAdmins();
   } catch (error) {
@@ -82,7 +80,7 @@ const handleAddAdmin = async (values) => {
   const handleDeleteAdmin = async (adminId) => {
     try {
       await axios.delete(`${BASE_URL}api/users/${adminId}`);
-      notification.success({ message: "Устгасан!", description: "Админ устгагдлаа." });
+      toast.success("Админ устгагдлаа.");
       fetchAdmins();
     } catch (error) {
       notification.error({ message: "Алдаа", description: error.message });
@@ -93,7 +91,6 @@ const handleAddAdmin = async (values) => {
     confirm({
       title: `${name} админыг устгах уу?`,
       icon: <ExclamationCircleOutlined />,
-      content: "Энэ үйлдэл нь буцаж болдоггүй!",
       okText: "Тийм",
       okType: "danger",
       cancelText: "Үгүй",
@@ -149,7 +146,7 @@ const handleAddAdmin = async (values) => {
                     name="name"
                     rules={[{ required: true, message: "Нэр оруулна уу!" }]}
                   >
-                    <Input placeholder="Жишээ: Бат" />
+                    <Input placeholder="Жишээ: Мөнхбат" />
                   </Form.Item>
                 </Col>
                 <Col span={12}>

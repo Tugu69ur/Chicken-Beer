@@ -100,7 +100,7 @@ const ManageClients = () => {
 
   const handleDeleteClient = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}api/clients/${id}`);
+      await axios.delete(`${BASE_URL}api/users/${id}`);
       notification.success({
         message: "Устгасан!",
         description: "Үйлчлүүлэгч амжилттай устлаа.",
@@ -115,7 +115,6 @@ const ManageClients = () => {
     confirm({
       title: `${name} үйлчлүүлэгчийг устгах уу?`,
       icon: <ExclamationCircleOutlined />,
-      content: "Энэ үйлдэл нь буцаж болдоггүй.",
       okText: "Тийм",
       okType: "danger",
       cancelText: "Үгүй",
@@ -155,7 +154,7 @@ const ManageClients = () => {
       render: (_, record) => (
         <Button
           danger
-          onClick={() => showDeleteConfirm(record._id, record.firstName)}
+          onClick={() => showDeleteConfirm(record._id, record.name)}
         >
           Устгах
         </Button>

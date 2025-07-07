@@ -11,7 +11,7 @@ import { authorizeRoles } from "../middleware/authorizeRole.js";
 
 const router = express.Router();
 
-router.post("/", protect, authorizeRoles("admin", "client"), createBranch);
+router.post("/", createBranch);
 
 router.get("/", getAllBranches);
 
@@ -19,6 +19,6 @@ router.get("/:id", getBranchById);
 
 router.put("/:id", protect, authorizeRoles("admin", "client"), updateBranch);
 
-router.delete("/:id", protect, authorizeRoles("admin", "client"), deleteBranch);
+router.delete("/:id", deleteBranch);
 
 export default router;
