@@ -20,7 +20,7 @@ function generatePickupTimes() {
   let currentMinutes = now.getHours() * 60 + now.getMinutes();
   currentMinutes = Math.ceil(currentMinutes / 15) * 15;
 
-  const start = Math.max(currentMinutes, 9 * 60); 
+  const start = Math.max(currentMinutes, 9 * 60);
   const end = 20 * 60; // 8:00 PM
 
   for (let t = start; t <= end; t += 15) {
@@ -59,7 +59,7 @@ function Qpay() {
   }, [selectedPayment]);
 
   const validateForm = () => {
-    if (!extraPhone || !note ) {
+    if (!extraPhone || !note) {
       toast.error("Бүх талбарыг бүрэн бөглөнө үү");
       return false;
     }
@@ -152,6 +152,16 @@ function Qpay() {
             <div className="mt-4 space-y-3">
               <Input
                 placeholder="Утасны дугаар"
+                rules={[
+                  {
+                    required: true,
+                    message: "Утасны дугаараа оруулна уу",
+                  },
+                  {
+                    pattern: /^\d{8}$/,
+                    message: "Утасны дугаар 8 оронтой тоо байх ёстой",
+                  },
+                ]}
                 value={extraPhone}
                 onChange={(e) => setExtraPhone(e.target.value)}
               />

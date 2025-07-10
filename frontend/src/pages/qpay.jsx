@@ -76,8 +76,16 @@ function Qpay() {
   }, [selectedPayment]);
 
   const validateForm = () => {
-    if (!phone || !entrance || !code || !door) {
+    if (!phone || !entrance || !code || !door || !extraPhone) {
       toast.error("Бүх талбарыг бүрэн бөглөнө үү");
+      return false;
+    }
+    if (!/^\d{8}$/.test(phone)) {
+      toast.error("Утасны дугаар 8 оронтой тоо байх ёстой");
+      return false;
+    }
+    if (!/^\d{8}$/.test(extraPhone)) {
+      toast.error("Нэмэлт утасны дугаар 8 оронтой тоо байх ёстой");
       return false;
     }
     if (!selectedPayment) {
@@ -176,7 +184,16 @@ function Qpay() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <Input
                 placeholder="Утасны дугаар"
-                required
+                rules={[
+                  {
+                    required: true,
+                    message: "Утасны дугаараа оруулна уу",
+                  },
+                  {
+                    pattern: /^\d{8}$/,
+                    message: "Утасны дугаар 8 оронтой тоо байх ёстой",
+                  },
+                ]}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />

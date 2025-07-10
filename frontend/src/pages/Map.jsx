@@ -5,8 +5,9 @@ import icon from "../assets/real.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import { Row, Col, Card, Input } from "antd";
 import Navbar from "../components/Navbar";
-import axios from 'axios';
+import axios from "axios";
 import { BASE_URL } from "../../constants.js";
+import { useNavigate } from "react-router-dom";
 
 const { Search } = Input;
 
@@ -26,10 +27,18 @@ export default function SimpleMap() {
   const [center] = useState([47.9181, 106.9175]);
   const [searchText, setSearchText] = useState("");
   const [branches, setBranches] = useState([]);
+  const navigate = useNavigate();
 
   const filteredPlaces = branches.filter((place) =>
     place.name.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  // Handler for selecting a branch
+  const handleSelectBranch = (branch) => {
+    localStorage.setItem("selectedBranch", JSON.stringify(branch));
+    localStorage.setItem("orderOption", "pickup");
+    navigate("/");
+  };
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -37,7 +46,7 @@ export default function SimpleMap() {
         const response = await axios.get(`${BASE_URL}api/branches`);
         setBranches(response.data);
       } catch (error) {
-        console.error('Error fetching branches:', error);
+        console.error("Error fetching branches:", error);
       }
     };
 
@@ -57,21 +66,24 @@ export default function SimpleMap() {
       }).addTo(mapInstance.current);
 
       branches.forEach((place) => {
-        const popupContent = `
-            <div style="text-align:center; max-width:200px;">
-      <h3>${place.name}</h3>
-      <img src="${place.img}" alt="${place.name}" style="width:100%; border-radius:8px; margin-bottom:8px;" />
-        <button onclick="window.location.href='/'"  style="
-        background-color: #D81E1E;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-      ">Сонгох</button>
-    </div>
-  `;
+        const popupContent = document.createElement("div");
+        popupContent.style.textAlign = "center";
+        popupContent.style.maxWidth = "200px";
+        popupContent.innerHTML = `
+          <h3>${place.name}</h3>
+          <img src="${place.img}" alt="${place.name}" style="width:100%; border-radius:8px; margin-bottom:8px;" />
+        `;
+        const button = document.createElement("button");
+        button.textContent = "Сонгох";
+        button.style.backgroundColor = "#D81E1E";
+        button.style.color = "white";
+        button.style.border = "none";
+        button.style.padding = "8px 16px";
+        button.style.borderRadius = "6px";
+        button.style.cursor = "pointer";
+        button.style.fontWeight = "600";
+        button.onclick = () => handleSelectBranch(place);
+        popupContent.appendChild(button);
 
         L.marker(place.position, { icon: userIcon })
           .addTo(mapInstance.current)
@@ -119,6 +131,11 @@ export default function SimpleMap() {
               style={{ marginBottom: "12px", backgroundColor: "#f9f9f9" }}
               hoverable
               size="small"
+              onClick={() => {
+                if (mapInstance.current) {
+                  mapInstance.current.setView(place.position, 14); // You can adjust zoom level
+                }
+              }}
             >
               {place.name}
             </Card>
