@@ -21,7 +21,7 @@ function generatePickupTimes() {
   currentMinutes = Math.ceil(currentMinutes / 15) * 15;
 
   const start = Math.max(currentMinutes, 9 * 60);
-  const end = 20 * 60; // 8:00 PM
+  const end = 24 * 60; // 8:00 PM
 
   for (let t = start; t <= end; t += 15) {
     const hours = Math.floor(t / 60);

@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { Card, Typography, List, Spin, Alert, Divider, Tag, Space, Image } from "antd";
+import {
+  Card,
+  Typography,
+  List,
+  Spin,
+  Alert,
+  Divider,
+  Tag,
+  Space,
+  Image,
+  Row,
+  Col,
+  Badge,
+} from "antd";
 import axios from "axios";
 import { BASE_URL } from "../../../constants";
 
@@ -28,7 +41,9 @@ function ClientDashboard() {
       .get(`${BASE_URL}api/orderss`)
       .then((res) => {
         // Filter orders by address matching user.branch
-        const branchOrders = res.data.filter((order) => order.address === user.branch);
+        const branchOrders = res.data.filter(
+          (order) => order.address === user.branch
+        );
         setOrders(branchOrders);
       })
       .catch((err) => {
@@ -43,13 +58,19 @@ function ClientDashboard() {
   return (
     <>
       <Navbar />
-      <div className="p-10 max-w-6xl mx-auto">
-        <Title level={2} style={{ textAlign: "center", marginBottom: 24 }}>
+      <div
+        className="p-8 max-w-7xl mx-auto"
+        style={{ minHeight: "80vh", backgroundColor: "#fafafa" }}
+      >
+        <Title
+          level={2}
+          style={{ textAlign: "center", marginBottom: 36, color: "#222" }}
+        >
           Таны салбар: {userBranch || "Тодорхойгүй"}
         </Title>
 
         {loading && (
-          <div style={{ textAlign: "center", marginTop: 40 }}>
+          <div style={{ textAlign: "center", marginTop: 80 }}>
             <Spin size="large" />
           </div>
         )}
@@ -58,44 +79,111 @@ function ClientDashboard() {
           <Alert
             type="error"
             message={error}
-            style={{ marginBottom: 24 }}
+            style={{ marginBottom: 32, maxWidth: 600, margin: "0 auto" }}
             showIcon
           />
         )}
 
         {!loading && !error && orders.length === 0 && (
-          <Text type="secondary" style={{ display: "block", textAlign: "center", marginTop: 40 }}>
+          <Text
+            type="secondary"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: 80,
+              fontSize: 18,
+              fontWeight: "500",
+              color: "#555",
+            }}
+          >
             Таны салбарт захиалга алга
           </Text>
         )}
 
         {!loading && !error && orders.length > 0 && (
           <List
-            grid={{ gutter: 16, column: 1 }}
+            grid={{
+              gutter: 24,
+              xs: 1,
+              sm: 1,
+              md: 2,
+              lg: 2,
+              xl: 3,
+            }}
             dataSource={orders}
             renderItem={(order) => {
-              const orderDate = new Date(order.createdAt).toLocaleString("mn-MN", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              });
+              const orderDate = new Date(order.createdAt).toLocaleString(
+                "mn-MN",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              );
 
               return (
                 <List.Item key={order._id}>
                   <Card
-                    title={`Захиалга ID: ${order._id.substring(0, 8)}`}
-                    bordered
+                    title={
+                      <>
+                        Захиалга ID:{" "}
+                        <Text keyboard>{order._id.substring(0, 8)}</Text>
+                      </>
+                    }
+                    bordered={false}
                     hoverable
-                    extra={<Tag color={order.paymentMethod === "qpay" ? "red" : "gold"}>{order.paymentMethod.toUpperCase()}</Tag>}
+                    style={{
+                      borderRadius: 12,
+                      boxShadow:
+                        "0 4px 12px rgba(0,0,0,0.1), 0 0 6px rgba(0,0,0,0.05)",
+                      backgroundColor: "#fff",
+                    }}
+                    extra={
+                      <Tag
+                        color={
+                          order.paymentMethod === "qpay"
+                            ? "volcano"
+                            : "gold"
+                        }
+                        style={{ fontWeight: "bold", fontSize: 14 }}
+                      >
+                        {order.paymentMethod?.toUpperCase() || "UNKNOWN"}
+                      </Tag>
+                    }
                   >
-                    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                      <Text><b>Захиалагчийн утас:</b> {order.extraPhone || "Тодорхойгүй"}</Text>
-                      <Text><b>Төлбөрийн төрөл:</b> {order.personType || "Тодорхойгүй"}</Text>
-                      <Text><b>Очиж авах цаг:</b> {order.note || "Тодорхойгүй"}</Text>
-                      <Text><b>Хаяг:</b> {order.address || "Тодорхойгүй"}</Text>
-                      <Text><b>Захиалсан огноо:</b> {orderDate}</Text>
+                    <Space
+                      direction="vertical"
+                      size="large"
+                      style={{ width: "340px" }}
+                    >
+                      <Row justify="space-between" style={{ fontSize: 15 }}>
+                        <Col xs={24} sm={12}>
+                          <Text strong>Захиалагчийн утас:</Text>{" "}
+                          {order.extraPhone || "Тодорхойгүй"}
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Text strong>Төлбөрийн төрөл:</Text>{" "}
+                          {order.personType || "Тодорхойгүй"}
+                        </Col>
+                      </Row>
+
+                      <Row justify="space-between" style={{ fontSize: 15 }}>
+                        <Col xs={24} sm={12}>
+                          <Text strong>Очиж авах цаг:</Text>{" "}
+                          {order.note || "Тодорхойгүй"}
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Text strong>Хаяг:</Text> {order.address || "Тодорхойгүй"}
+                        </Col>
+                      </Row>
+
+                      <Row style={{ fontSize: 15 }}>
+                        <Col>
+                          <Text strong>Захиалсан огноо:</Text> {orderDate}
+                        </Col>
+                      </Row>
 
                       <Divider>Бараанууд</Divider>
 
@@ -103,24 +191,47 @@ function ClientDashboard() {
                         dataSource={order.orders}
                         itemLayout="horizontal"
                         renderItem={(item) => (
-                          <List.Item>
+                          <List.Item style={{ paddingLeft: 0 }}>
                             <List.Item.Meta
                               avatar={
-                                <Image
-                                  width={80}
-                                  src={item.image}
-                                  alt={item.name}
-                                  style={{ borderRadius: 8, objectFit: "cover" }}
-                                  placeholder={
-                                    <div style={{ width: 80, height: 80, backgroundColor: "#f0f0f0" }} />
-                                  }
-                                />
+                                <div
+                                  style={{
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: 12,
+                                    overflow: "hidden",
+                                    backgroundColor: "#f0f0f0",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  <Image
+                                    src={item.image}
+                                    alt={item.name}
+                                    width={80}
+                                    height={80}
+                                    style={{ objectFit: "cover" }}
+                                    preview={false}
+                                    fallback="/fallback-image.png"
+                                  />
+                                </div>
                               }
-                              title={item.name}
+                              title={
+                                <Text
+                                  style={{
+                                    fontWeight: "600",
+                                    fontSize: 16,
+                                  }}
+                                >
+                                  {item.name}
+                                </Text>
+                              }
                               description={
                                 <>
-                                  <Text>Үнэ: <b>{item.price}</b></Text><br />
-                                  <Text>Тоо ширхэг: <b>{item.quantity}</b></Text>
+                                  <Text>Үнэ: </Text>
+                                  <Text strong>{item.price}</Text>
+                                  <br />
+                                  <Text>Тоо ширхэг: </Text>
+                                  <Text strong>{item.quantity}</Text>
                                 </>
                               }
                             />
