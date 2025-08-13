@@ -159,7 +159,7 @@ const AdminDashboard = () => {
               justifyContent: "center",
             }}
           >
-            <div style={{ maxWidth: 1400, width: "100%", marginLeft: '200px' }} className="mx-auto">
+            <div style={{ maxWidth: 1400, width: "100%" }} className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
               <Row gutter={[24, 24]}>
                 {/* Total Orders */}
                 <Col xs={24} sm={12} md={6}>
@@ -171,7 +171,7 @@ const AdminDashboard = () => {
                       boxShadow: "0 4px 12px rgb(255 77 79 / 0.2)",
                     }}
                   >
-                    <div style={{ height: 450 }}>
+                    <div className="h-[240px] sm:h-[320px] md:h-[450px]">
                       <Bar data={ordersData} options={barOptions} />
                     </div>
                   </Card>
@@ -187,7 +187,7 @@ const AdminDashboard = () => {
                       boxShadow: "0 4px 12px rgb(255 77 79 / 0.2)",
                     }}
                   >
-                    <div style={{ height: 450 }}>
+                    <div className="h-[240px] sm:h-[320px] md:h-[450px]">
                       <Bar data={revenueData} options={barOptions} />
                     </div>
                   </Card>

@@ -165,7 +165,7 @@ const ManageClients = () => {
   return (
     <>
       <Navbar />
-      <div className="p-4 max-w-[1500px] w-full mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
         <Row gutter={[24, 24]}>
           {/* Add Client */}
           <Col xs={24} md={12}>
@@ -176,7 +176,7 @@ const ManageClients = () => {
                 onFinish={handleAddClient}
               >
                 <Row gutter={16}>
-                  <Col span={12}>
+                  <Col xs={24} sm={12}>
                     <Form.Item
                       label="Нэр"
                       name="name"
@@ -185,7 +185,7 @@ const ManageClients = () => {
                       <Input placeholder="Жишээ: Бат" />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
+                  <Col xs={24} sm={12}>
                     <Form.Item
                       label="phone"
                       name="phone"
@@ -259,6 +259,8 @@ const ManageClients = () => {
                   columns={clientColumns}
                   rowKey="_id"
                   pagination={{ pageSize: 5 }}
+                  size="small"
+                  scroll={{ x: true }}
                 />
               )}
             </Card>

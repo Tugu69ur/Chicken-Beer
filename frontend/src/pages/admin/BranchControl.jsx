@@ -163,7 +163,7 @@ const BranchControl = () => {
     <>
       <Navbar />
       <ToastContainer />
-      <div className="p-4 max-w-[1500px] w-full mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
         <Title level={2}>Салбар Удирдах</Title>
         <Row gutter={[24, 24]}>
           <Col xs={24} md={12}>
@@ -220,12 +220,13 @@ const BranchControl = () => {
                   <Spin size="large" />
                 </div>
               ) : (
-                <Table
-                
+                                <Table
                   dataSource={branches}
                   columns={columns}
                   rowKey="_id"
                   pagination={{ pageSize: 5 }}
+                  size="small"
+                  scroll={{ x: true }}
                 />
               )}
             </Card>

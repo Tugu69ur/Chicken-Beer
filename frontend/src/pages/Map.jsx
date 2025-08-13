@@ -102,44 +102,40 @@ export default function SimpleMap() {
   return (
     <>
       <Navbar />
-      <Row gutter={16} style={{ padding: "24px" }}>
-        <Col span={16}>
+      <Row gutter={[16, 16]} className="px-4 sm:px-6 md:px-8 lg:px-12 py-4">
+        <Col xs={24} md={16}>
           <div
             ref={mapRef}
-            style={{
-              height: "600px",
-              borderRadius: "12px",
-              overflow: "hidden",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            }}
+            className="h-[320px] sm:h-[420px] md:h-[600px] rounded-[12px] overflow-hidden shadow"
           />
         </Col>
-        <Col span={8}>
-          <h2 style={{ marginBottom: "16px" }}>Салбарууд</h2>
+        <Col xs={24} md={8} className="mt-2 md:mt-0">
+          <h2 className="text-lg sm:text-xl mb-4">Салбарууд</h2>
           <Search
             placeholder="Хайх..."
             allowClear
             enterButton
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ marginBottom: "16px" }}
-            className="custom-search"
+            className="mb-4"
           />
 
-          {filteredPlaces.map((place, index) => (
-            <Card
-              key={index}
-              style={{ marginBottom: "12px", backgroundColor: "#f9f9f9" }}
-              hoverable
-              size="small"
-              onClick={() => {
-                if (mapInstance.current) {
-                  mapInstance.current.setView(place.position, 14); // You can adjust zoom level
-                }
-              }}
-            >
-              {place.name}
-            </Card>
-          ))}
+          <div className="space-y-3">
+            {filteredPlaces.map((place, index) => (
+              <Card
+                key={index}
+                style={{ backgroundColor: "#f9f9f9" }}
+                hoverable
+                size="small"
+                onClick={() => {
+                  if (mapInstance.current) {
+                    mapInstance.current.setView(place.position, 14);
+                  }
+                }}
+              >
+                {place.name}
+              </Card>
+            ))}
+          </div>
         </Col>
       </Row>
     </>

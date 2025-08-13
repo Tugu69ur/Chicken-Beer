@@ -133,14 +133,14 @@ const handleAddAdmin = async (values) => {
     <>
 
     <Navbar />
-    <div className="p-4 max-w-[1500px] w-full mx-auto">
+    <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
       <Row gutter={[24, 24]}>
         {/* Admin Add Form */}
         <Col xs={24} md={12}>
           <Card title="Шинэ Админ Нэмэх" bordered={false}>
             <Form layout="vertical" form={form} onFinish={handleAddAdmin}>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Form.Item
                     label="Нэр"
                     name="name"
@@ -149,7 +149,7 @@ const handleAddAdmin = async (values) => {
                     <Input placeholder="Жишээ: Мөнхбат" />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Form.Item
                     label="Утас"
                     name="phone"
@@ -207,6 +207,8 @@ const handleAddAdmin = async (values) => {
                 columns={columns}
                 rowKey="_id"
                 pagination={{ pageSize: 5 }}
+                size="small"
+                scroll={{ x: true }}
               />
             )}
           </Card>

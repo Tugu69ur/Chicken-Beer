@@ -152,7 +152,7 @@ const Home = () => {
     <>
       <Navbar basketCount={basketCount} orders={orders} />
 
-      <div className="relative w-full h-[657px] overflow-hidden">
+      <div className="relative w-full h-[400px] md:h-[657px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-l from-black/50 to-transparent z-10" />
         <img
           src={images[currentIndex]}
@@ -163,9 +163,9 @@ const Home = () => {
           key={currentIndex}
         />
         {!isAnimating && (
-          <div className="absolute w-[500px] left-0 top-1/2 transform -translate-y-1/2 p-4 bg-opacity-50 text-white text-center flex-start z-20">
-            <h2 className="text-7xl font-bold">Онлайн захиалга</h2>
-            <p className="mt-4 text-xl">
+          <div className="absolute w-full max-w-[500px] left-0 top-1/2 transform -translate-y-1/2 p-4 bg-opacity-50 text-white text-center flex-start z-20 px-4">
+            <h2 className="text-4xl md:text-7xl font-bold">Онлайн захиалга</h2>
+            <p className="mt-4 text-base md:text-xl">
               Амтат шарсан тахиагаа онлайнаар захиалаад амралтын өдрийг гэр бүлтэйгээ өнгөрүүлээрэй.
             </p>
             <button
@@ -178,7 +178,8 @@ const Home = () => {
         )}
       </div>
 
-      <div className="h-24 w-full bg-slate-100 px-6 md:px-24 lg:px-48 flex items-center gap-4">
+      {/* Location & Option Selector */}
+      <div className="w-full bg-slate-100 px-4 sm:px-6 md:px-24 lg:px-48 py-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
         <EnvironmentOutlined
           style={{ fontSize: "24px", color: "#ff4d4f", cursor: "pointer" }}
           onClick={handleGetLocation}
@@ -188,9 +189,9 @@ const Home = () => {
             placeholder="Байршил оруулах"
             value={locationText || savedLocation || ""}
             readOnly
-            variant="default"  // fixed deprecated prop here
+            variant="default"
             required
-            className="h-10 flex-1 min-w-28"
+            className="h-10 flex-1 min-w-0"
           />
         ) : (
           <Dropdown
@@ -204,34 +205,36 @@ const Home = () => {
             placement="bottomLeft"
             arrow
           >
-            <Button className="h-10 flex-1 min-w-28 text-left">
+            <Button className="h-10 flex-1 min-w-0 text-left">
               {selectedBranch ? selectedBranch.name : "Салбар сонгох"}
             </Button>
           </Dropdown>
         )}
 
-        <Button
-          type="text"
-          onClick={() => handleOptionChange("delivery")}
-          className={`rounded-full px-6 py-1 text-sm font-medium transition-colors duration-200 ${
-            selectedOption === "delivery"
-              ? "bg-red-500 text-white hover:bg-red-600"
-              : "border border-red-500 text-red-500 hover:bg-red-100"
-          }`}
-        >
-          Хүргэлт
-        </Button>
-        <Button
-          type="text"
-          onClick={() => handleOptionChange("pickup")}
-          className={`rounded-full px-6 py-1 text-sm font-medium transition-colors duration-200 ${
-            selectedOption === "pickup"
-              ? "bg-red-500 text-white hover:bg-red-600"
-              : "border border-red-500 text-red-500 hover:bg-red-100"
-          }`}
-        >
-          Очиж авах
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+          <Button
+            type="text"
+            onClick={() => handleOptionChange("delivery")}
+            className={`flex-1 sm:flex-none rounded-full px-4 py-1 text-sm font-medium transition-colors duration-200 ${
+              selectedOption === "delivery"
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : "border border-red-500 text-red-500 hover:bg-red-100"
+            }`}
+          >
+            Хүргэлт
+          </Button>
+          <Button
+            type="text"
+            onClick={() => handleOptionChange("pickup")}
+            className={`flex-1 sm:flex-none rounded-full px-4 py-1 text-sm font-medium transition-colors duration-200 ${
+              selectedOption === "pickup"
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : "border border-red-500 text-red-500 hover:bg-red-100"
+            }`}
+          >
+            Очиж авах
+          </Button>
+        </div>
       </div>
 
       <div ref={orderRef} className="mt-[-40px]">

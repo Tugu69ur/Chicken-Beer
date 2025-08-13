@@ -96,18 +96,7 @@ function Menu({ addOrder }) {
   };
 
   const addToCart = (product) => {
-    const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-
-    const existingIndex = savedOrders.findIndex(
-      (item) => item.name === product.name
-    );
-
-    if (existingIndex !== -1) {
-      savedOrders[existingIndex].quantity += quantity;
-    } else {
-      savedOrders.push({ ...product, quantity: quantity });
-    }
-    localStorage.setItem("orders", JSON.stringify(savedOrders));
+    addOrder(product, quantity);
     toast.success("Сагсанд нэмэгдлээ");
   };
 
@@ -137,11 +126,11 @@ function Menu({ addOrder }) {
     return <div className="text-center mt-20">No menu items found</div>;
 
   return (
-    <div className="px-44 mt-16">
+    <div className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-44 mt-8 sm:mt-12">
       {menu.map((category, idx) => (
         <div key={idx} className="mb-12">
-          <h1 className="text-3xl mb-6 ml-6 text-start">{category.title}</h1>
-          <div className="grid md:grid-cols-3 gap-9">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl mb-4 sm:mb-6 ml-2 sm:ml-6 text-start">{category.title}</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-9">
             {category.items.map((item, index) => (
               <div
                 key={index}
@@ -150,17 +139,17 @@ function Menu({ addOrder }) {
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-65 object-cover"
+                  className="w-full h-60 sm:h-48 md:h-56 object-cover"
                 />
                 <div className="p-4 transition-all duration-300">
                   <h2 className="text-md font-bold">{item.name}</h2>
-                  <p className="text-red-600 font-bold text-2xl">
+                  <p className="text-red-600 font-bold text-lg sm:text-xl">
                     {item.price}
                   </p>
-                  <div className="mt-[-20px] opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-40 transition-all duration-300 overflow-hidden">
+                  <div className="mt-2 sm:mt-[-20px] opacity-100 sm:opacity-0 sm:max-h-0 sm:group-hover:opacity-100 sm:group-hover:max-h-40 transition-all duration-300 overflow-hidden">
                     <p className="text-sm text-gray-600">{item.description}</p>
                     <button
-                      className="w-full h-[40px] px-3 py-1 bg-[#D81E1E] text-white text-sm font-bold rounded hover:bg-red-700"
+                      className="w-full h-[40px] px-3 py-1 mt-3 bg-[#D81E1E] text-white text-sm font-bold rounded hover:bg-red-700"
                       onClick={() => handleAddToBasket(item)}
                     >
                       Сагсанд хийх
