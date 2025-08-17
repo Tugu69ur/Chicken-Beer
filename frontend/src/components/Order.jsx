@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BASE_URL } from "../../constants.js";
 import { useNavigate } from "react-router-dom";
-import icon from "../assets/cart.png";
+import icon from "/assets/cart.png";
 import { Modal, Row, Col, Button, Typography } from "antd";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

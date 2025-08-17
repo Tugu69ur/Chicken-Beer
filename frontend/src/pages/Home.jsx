@@ -1,6 +1,6 @@
-import logo from "../assets/logo4.png";
-import logo1 from "../assets/logo3.png";
-import logo2 from "../assets/logo2.png";
+import logo from "/assets/logo4.png";
+import logo1 from "/assets/logo3.png";
+import logo2 from "/assets/logo2.png";
 import { useState, useEffect, useRef } from "react";
 import Order from "../components/Order";
 import Navbar from "../components/Navbar";

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/icon5.png";
+import logo from "/assets/icon5.png";
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
-import Basket from "../assets/cart.png";
+import Basket from "/assets/cart.png";
 
 function Footer() {
   const [totalQuantity, setTotalQuantity] = useState(0);

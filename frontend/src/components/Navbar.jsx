@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import logo from "../assets/logo.png";
+import logo from "/assets/logo.png";
 import Login from "./Login";
-import ProfileIcon from "../assets/profile.png"; // Assuming you have a profile icon
+import ProfileIcon from "/assets/profile.png"; // Assuming you have a profile icon
 
-function Navbar({ basketCount, orders }) {
+function Navbar() {
   const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(() => {

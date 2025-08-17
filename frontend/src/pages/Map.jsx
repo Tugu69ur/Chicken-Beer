@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import icon from "../assets/real.png";
+import icon from "/assets/real.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import { Row, Col, Card, Input } from "antd";
 import Navbar from "../components/Navbar";
