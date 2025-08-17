@@ -5,12 +5,19 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   build: {
-    minify: "esbuild", // use esbuild instead of terser
+    minify: "esbuild", // safe and fast
     sourcemap: false, // saves memory
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"], // split big deps
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            // split every dependency into its own chunk
+            return id
+              .toString()
+              .split("node_modules/")[1]
+              .split("/")[0]
+              .toString();
+          }
         },
       },
     },
