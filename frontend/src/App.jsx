@@ -15,6 +15,7 @@ import AdminControl from "./pages/admin/AdminControl.jsx";
 import ClientControl from "./pages/admin/ClientControl.jsx";
 import MenuControl from "./pages/admin/MenuControl.jsx";
 import BranchControl from "./pages/admin/BranchControl.jsx";
+import Delivery from "./pages/Delivery.jsx";
 import "antd/dist/reset.css";
 
 
@@ -29,7 +30,7 @@ function App() {
         <Route path="/qpay" element={<Qpay />} />
         <Route path="/qpayy" element={<Qpayy />} />
         <Route path="/map" element={<Map />} />
-
+        <Route path="/delivery" element={<Delivery />} />
         <Route
           path="/client-dashboard"
           element={

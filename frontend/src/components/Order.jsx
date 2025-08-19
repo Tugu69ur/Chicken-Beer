@@ -139,7 +139,7 @@ function Menu({ addOrder }) {
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-60 sm:h-48 md:h-56 object-cover"
+                  className="w-full h-48 sm:h-48 md:h-72 object-cover"
                 />
                 <div className="p-4 transition-all duration-300">
                   <h2 className="text-md font-bold">{item.name}</h2>
