@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/charts": "^1.4.2",
     "@paypal/react-paypal-js": "^7.1.7",
     "antd": "^5.8.6",
     "axios": "^1.4.0",
