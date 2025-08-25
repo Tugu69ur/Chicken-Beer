@@ -16,7 +16,6 @@ import ClientControl from "./pages/admin/ClientControl.jsx";
 import MenuControl from "./pages/admin/MenuControl.jsx";
 import BranchControl from "./pages/admin/BranchControl.jsx";
 import Delivery from "./pages/Delivery.jsx";
-import "antd/dist/reset.css";
 
 
 function App() {
