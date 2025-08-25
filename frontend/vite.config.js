@@ -14,7 +14,19 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            return id.toString().split("node_modules/")[1].split("/")[0];
+            const chunk = id.toString().split("node_modules/")[1].split("/")[0];
+            if (
+              [
+                "dayjs",
+                "json2mq",
+                "react-router-dom",
+                "set-cookie-parser",
+                "string-convert",
+              ].includes(chunk)
+            ) {
+              return;
+            }
+            return chunk;
           }
         },
       },
