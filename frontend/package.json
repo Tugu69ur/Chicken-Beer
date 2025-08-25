@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/charts": "^2.0.2",
     "@paypal/react-paypal-js": "^7.1.7",
     "antd": "^5.8.6",
     "axios": "^1.4.0",
+    "chart.js": "^4.3.0",
     "chartjs-plugin-datalabels": "^2.1.0",
     "leaflet": "^1.9.3",
     "react": "^18.2.0",
