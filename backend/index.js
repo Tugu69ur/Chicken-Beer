@@ -7,14 +7,12 @@ import menuRoutes from "./routes/menu_routes.js";
 import qpayRoutes from "./routes/qpay_routes.js";
 import otpRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/order_routes.js";
+import branchRoutes from "./routes/branch_routes.js";
+import bandiRoutes from "./routes/bandi_routes.js";
+import userRoutes from "./routes/userRoutes.js";
 import cors from "cors";
-import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import branchRoutes from './routes/branch_routes.js';
-import bandiRoutes from './routes/bandi_routes.js';
-import userRoutes from './routes/userRoutes.js';
-
 
 dotenv.config();
 connectDB();
@@ -22,15 +20,12 @@ connectDB();
 const PORT = process.env.PORT || 7000;
 const app = express();
 
+// Body parser
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 
-
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+// CORS
+app.use(cors({ origin: "*" }));
 
 // API routes
 app.use("/api/register", registerRoutes);
@@ -40,18 +35,21 @@ app.use("/api/qpay", qpayRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/branches", branchRoutes);
-app.use('/api/orderss', bandiRoutes);
-app.use('/api/users', userRoutes);
+app.use("/api/orderss", bandiRoutes);
+app.use("/api/users", userRoutes);
 
+// Serve React frontend
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-app.get("{any}", (req, res) => {
+// Catch all other routes and return React's index.html
+app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Start server
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
