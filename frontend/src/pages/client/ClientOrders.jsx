@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../components/Navbar";
+import ClientNavbar from "../../components/ClientNavbar";
 import {
   Card,
   Typography,
@@ -19,7 +19,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { BASE_URL } from "../../../constants";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const STATUS_FLOW = {
   pending: "accepted",
@@ -39,7 +39,7 @@ const STATUS_COLORS = {
 
 const ALL_STATUSES = ["pending", "accepted", "cooking", "delivering", "delivered"];
 
-function ClientDashboard() {
+function ClientOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -192,11 +192,18 @@ function ClientDashboard() {
 
   return (
     <>
-      <Navbar />
-      <div className="p-10 max-w-7xl mx-auto min-h-screen">
-        <Title level={2} className="mb-6">
-          2030Chicken Orders Dashboard
-        </Title>
+      <ClientNavbar />
+      <div className="min-h-screen bg-slate-50 py-10">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+            <Title level={2} className="text-slate-900">
+              Захиалгын самбар
+            </Title>
+            <Text className="text-slate-600">
+              Захиалгын статус, тээвэрлэлт ба удирдлагын ажилбар.
+            </Text>
+          </div>
+        </div>
 
         {/* Status filter buttons */}
         <Space style={{ marginBottom: 20 }}>
@@ -234,4 +241,4 @@ function ClientDashboard() {
   );
 }
 
-export default ClientDashboard;
+export default ClientOrders;

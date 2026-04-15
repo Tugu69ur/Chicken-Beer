@@ -1,62 +1,20 @@
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-.custom-search .ant-input {
-  border: 1px solid #D81E1E;
-  border-radius: 8px;
-}
-
-.custom-search .ant-btn-primary {
-  background-color: #D81E1E;
-  border-color: #D81E1E;
-}
-
-.custom-search .ant-btn-primary:hover,
-.custom-search .ant-btn-primary:focus {
-  background-color: #b11616;
-  border-color: #b11616;
+  min-height: 100vh;
 }
 

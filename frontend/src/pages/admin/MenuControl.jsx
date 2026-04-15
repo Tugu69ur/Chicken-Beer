@@ -17,8 +17,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { PlusOutlined, ExclamationCircleOutlined, UploadOutlined} from "@ant-design/icons";
 import { BASE_URL } from "../../../constants";
-import Navbar from "../../components/Navbar";
+import AdminNavbar from "../../components/AdminNavbar";
 
+const { Title } = Typography;
 const { confirm } = Modal;
 
 const MenuControl = () => {
@@ -130,9 +131,13 @@ const MenuControl = () => {
   ];
 
   return (
-    <>
-      <Navbar />
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
+    <div className="min-h-screen bg-slate-100">
+      <AdminNavbar />
+      <div className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-8 lg:px-12">
+        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+          <Title level={2}>Меню Удирдах</Title>
+          <p className="mt-2 text-slate-600">Тахианы менюг нэмэх, устгах, ангилалын менежментийг хялбар шударгаар хий.</p>
+        </div>
         <Row gutter={[24, 24]}>
           <Col xs={24} md={12}>
             <Card title="Шинэ Меню Нэмэх">
@@ -229,7 +234,7 @@ const MenuControl = () => {
           </Col>
         </Row>
       </div>
-    </>
+    </div>
   );
 };
 

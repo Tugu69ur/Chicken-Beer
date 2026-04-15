@@ -16,7 +16,6 @@ import {
 } from "antd";
 import {
   DeleteOutlined,
-  EditOutlined,
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,
@@ -38,16 +37,11 @@ function MyOrders() {
     setOrders(savedOrders);
   }, []);
 
-  const calculateTotal = () => {
-    return orders.reduce((total, order) => {
+  const calculateTotal = () =>
+    orders.reduce((total, order) => {
       const cleanPrice = Number(order.price.replace(/[,₮]/g, "")) || 0;
       return total + cleanPrice * order.quantity;
     }, 0);
-  };
-
-  // const handleEdit = (order) => {
-  //   setEditingOrder({ ...order });
-  // };
 
   const handleSaveEdit = () => {
     if (editingOrder) {
@@ -86,168 +80,161 @@ function MyOrders() {
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
   };
 
+  const totalAmount = calculateTotal();
+
   if (!Array.isArray(orders) || orders.length === 0)
     return (
       <>
         <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <Empty
-            description="Таны сагс хоосон байна"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
-          <Button
-            type="primary"
-            size="large"
-            icon={<ShoppingCartOutlined />}
-            className="mt-4"
-            style={{ backgroundColor: "#D81E1E", borderColor: "#D81E1E" }}
-            onClick={() => navigate("/")}
-          >
-            Бүтээгдэхүүн сонгох
-          </Button>
+        <div className="flex min-h-[70vh] flex-col items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(216,29,30,0.12),transparent_20%),linear-gradient(180deg,#fffaf6_0%,#f8f2ee_55%,#fff_100%)] px-4 py-20">
+          <Card className="rounded-[32px] border border-slate-200 bg-white p-10 shadow-2xl">
+            <Empty
+              description="Таны сагс хоосон байна"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+            <Button
+              type="primary"
+              size="large"
+              icon={<ShoppingCartOutlined />}
+              className="mt-6 rounded-full bg-[#D81E1E] border-[#D81E1E]"
+              onClick={() => navigate("/")}
+            >
+              Бүтээгдэхүүн сонгох
+            </Button>
+          </Card>
         </div>
+        <Footer />
       </>
     );
 
   return (
     <>
       <Navbar />
-      <div className="p-10 max-w-6xl mx-auto mb-72">
-        <div className="flex items-center mb-6 ">
-          <Button
-            size="large"
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate("/")}
-          ></Button>
-          <Title level={2} className="!mb-0 ml-8">
-            Таны сагс
-          </Title>
-        </div>
-
-        <List
-          grid={{ gutter: 24, column: 1 }}
-          dataSource={orders}
-          renderItem={(order, index) => {
-            const cleanPrice = Number(order.price.replace(/[,₮]/g, "")) || 0;
-            const total = cleanPrice * order.quantity;
-
-            return (
-              <List.Item key={index}>
-                <Card
-                  variant="outlined"
-                  className="hover:shadow-lg transition-shadow duration-300"
-                >
-                  <Row align="middle" gutter={24}>
-                    <Col xs={24} sm={6}>
-                      <img
-                        src={order.image}
-                        alt={order.name}
-                        style={{
-                          width: "100%",
-                          height: 120,
-                          objectFit: "cover",
-                          borderRadius: 8,
-                        }}
-                      />
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Title level={4} className="!mb-2">
-                        {order.name}
-                      </Title>
-                      <Text type="secondary" className="text-base">
-                        {order.price} × {order.quantity}
-                      </Text>
-                    </Col>
-                    <Col xs={24} sm={6}>
-                      <Space
-                        direction="vertical"
-                        align="end"
-                        style={{ width: "100%" }}
-                      >
-                        <Space>
-                          <Text strong className="text-lg mr-7">
-                            {total.toLocaleString()}₮
-                          </Text>
-                          <Button
-                            icon={<MinusOutlined />}
-                            style={{ marginRight: 4 }}
-                            onClick={() =>
-                              handleQuantityChange(order, order.quantity - 1)
-                            }
-                            disabled={order.quantity <= 1}
-                          />
-
-                          <Text
-                            strong
-                            className="text-lg min-w-[40px] text-center"
-                          >
-                            {order.quantity}
-                          </Text>
-
-                          <Button
-                            icon={<PlusOutlined />}
-                            style={{ marginRight: 4 }}
-                            onClick={() =>
-                              handleQuantityChange(order, order.quantity + 1)
-                            }
-                          />
-
-                          <Button
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => handleDelete(order)}
-                          />
-                        </Space>
-                      </Space>
-                    </Col>
-                  </Row>
-                </Card>
-              </List.Item>
-            );
-          }}
-        />
-
-        <Card className="mt-6">
-          <Row gutter={24} align="middle">
-            <Col xs={24} sm={12}>
-              <Statistic
-                title="Нийт захиалга"
-                value={orders.length}
-                suffix="ширхэг"
-              />
-            </Col>
-            <Col xs={24} sm={12}>
-              <Statistic
-                title="Нийт дүн"
-                value={calculateTotal()}
-                suffix="₮"
-                valueStyle={{ color: "#D81E1E" }}
-              />
-            </Col>
-          </Row>
-          <Divider />
-          <div className="flex justify-end gap-4">
-            <Button
-              type="primary"
-              size="large"
-              style={{ backgroundColor: "#D81E1E", borderColor: "#D81E1E" }}
-              icon={<ShoppingCartOutlined />}
-              onClick={() => {
-                const totalAmount = calculateTotal();
-                const orderOption =
-                  localStorage.getItem("orderOption") || "delivery";
-                const route = orderOption === "delivery" ? "/qpay" : "/qpayy";
-                navigate(route, { state: { amount: totalAmount } });
-              }}
-            >
-              Захиалга хийх
-            </Button>
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(216,29,30,0.12),transparent_20%),linear-gradient(180deg,#fffaf6_0%,#f8f2ee_55%,#fff_100%)] pb-16 pt-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 overflow-hidden rounded-[32px] bg-white/95 p-8 shadow-2xl ring-1 ring-slate-200">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.28em] text-[#D81E1E]">Таны захиалга</p>
+                <Title className="!mb-0 text-slate-950">Сагс</Title>
+              </div>
+              <Button
+                type="text"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate("/")}
+                className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-slate-700 transition hover:border-slate-300"
+              >
+                Буцах
+              </Button>
+            </div>
+            <p className="mt-4 max-w-2xl text-slate-600">
+              Захиалгын сагсандаа нэмсэн бүтээгдэхүүнүүд, тоо ширхэг, нийт дүнг эндээс хялбархан засварлана.
+            </p>
           </div>
-        </Card>
+
+          <div className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
+            <div className="space-y-6">
+              <List
+                grid={{ gutter: 24, column: 1 }}
+                dataSource={orders}
+                renderItem={(order, index) => {
+                  const cleanPrice = Number(order.price.replace(/[,₮]/g, "")) || 0;
+                  const total = cleanPrice * order.quantity;
+
+                  return (
+                    <List.Item key={index}>
+                      <Card className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+                        <Row align="middle" gutter={24}>
+                          <Col xs={24} sm={6}>
+                            <img
+                              src={order.image}
+                              alt={order.name}
+                              className="h-32 w-full rounded-3xl object-cover"
+                            />
+                          </Col>
+                          <Col xs={24} sm={12}>
+                            <Title level={4} className="!mb-2 text-slate-950">
+                              {order.name}
+                            </Title>
+                            <Text className="text-base text-slate-600">
+                              {order.price} × {order.quantity}
+                            </Text>
+                          </Col>
+                          <Col xs={24} sm={6}>
+                            <div className="flex flex-col gap-4 items-end">
+                              <Text strong className="text-lg text-slate-900">
+                                {total.toLocaleString()}₮
+                              </Text>
+                              <Space>
+                                <Button
+                                  icon={<MinusOutlined />}
+                                  onClick={() =>
+                                    handleQuantityChange(order, order.quantity - 1)
+                                  }
+                                  disabled={order.quantity <= 1}
+                                />
+                                <Text className="min-w-[40px] text-center text-lg font-semibold">
+                                  {order.quantity}
+                                </Text>
+                                <Button
+                                  icon={<PlusOutlined />}
+                                  onClick={() =>
+                                    handleQuantityChange(order, order.quantity + 1)
+                                  }
+                                />
+                                <Button
+                                  danger
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => handleDelete(order)}
+                                />
+                              </Space>
+                            </div>
+                          </Col>
+                        </Row>
+                      </Card>
+                    </List.Item>
+                  );
+                }}
+              />
+            </div>
+
+            <Card className="rounded-[32px] border border-slate-200 bg-[#fff7f3] p-6 shadow-xl">
+              <Title level={4} className="text-slate-950">Товч захиалга</Title>
+              <Divider className="my-5" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm text-slate-500">
+                  <span>Тоо ширхэг</span>
+                  <span>{orders.length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-slate-500">
+                  <span>Нийт дүн</span>
+                  <span>{totalAmount.toLocaleString()}₮</span>
+                </div>
+              </div>
+              <Divider className="my-5" />
+              <div className="flex items-center justify-between text-lg font-semibold text-slate-900">
+                <span>Төлбөрийн дүн</span>
+                <span>{totalAmount.toLocaleString()}₮</span>
+              </div>
+              <Button
+                type="primary"
+                size="large"
+                className="mt-8 w-full rounded-full bg-[#D81E1E] border-[#D81E1E]"
+                icon={<ShoppingCartOutlined />}
+                onClick={() => {
+                  const orderOption =
+                    localStorage.getItem("orderOption") || "delivery";
+                  const route = orderOption === "delivery" ? "/qpay" : "/qpayy";
+                  navigate(route, { state: { amount: totalAmount } });
+                }}
+              >
+                Захиалга хийх
+              </Button>
+            </Card>
+          </div>
+        </div>
       </div>
 
-      {/* Edit Modal */}
       <Modal
         title="Захиалга засах"
         open={editingOrder !== null}
@@ -255,11 +242,7 @@ function MyOrders() {
         onCancel={() => setEditingOrder(null)}
         okText="Хадгалах"
         cancelText="Болих"
-        styles={{
-          mask: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-          },
-        }}
+        style={{ top: 20 }}
       >
         {editingOrder && (
           <Space direction="vertical" style={{ width: "100%" }}>
@@ -296,7 +279,6 @@ function MyOrders() {
         )}
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         title="Захиалга устгах"
         open={deleteConfirmOrder !== null}
@@ -304,16 +286,10 @@ function MyOrders() {
         onCancel={() => setDeleteConfirmOrder(null)}
         okText="Тийм"
         cancelText="Үгүй"
-        styles={{
-          mask: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-          },
-        }}
       >
-        <p>
-          Та {deleteConfirmOrder?.name} захиалгыг устгахдаа итгэлтэй байна уу?
-        </p>
+        <p>Та {deleteConfirmOrder?.name} захиалгыг устгахдаа итгэлтэй байна уу?</p>
       </Modal>
+
       <Footer />
     </>
   );

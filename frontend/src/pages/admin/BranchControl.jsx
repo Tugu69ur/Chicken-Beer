@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { BASE_URL } from "../../../constants";
-import Navbar from "../../components/Navbar";
+import AdminNavbar from "../../components/AdminNavbar";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
@@ -160,11 +160,14 @@ const BranchControl = () => {
   ];
 
   return (
-    <>
-      <Navbar />
+    <div className="min-h-screen bg-slate-100">
+      <AdminNavbar />
       <ToastContainer />
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
-        <Title level={2}>Салбар Удирдах</Title>
+      <div className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-8 lg:px-12">
+        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+          <Title level={2}>Салбар Удирдах</Title>
+          <p className="mt-2 text-slate-600">Салбарын байршил, нэр, устгал зэргийг хялбархан удирдана.</p>
+        </div>
         <Row gutter={[24, 24]}>
           <Col xs={24} md={12}>
             <Card title="Шинэ Салбар Нэмэх" variant="outlined">
@@ -233,7 +236,7 @@ const BranchControl = () => {
           </Col>
         </Row>
       </div>
-    </>
+    </div>
   );
 };
 

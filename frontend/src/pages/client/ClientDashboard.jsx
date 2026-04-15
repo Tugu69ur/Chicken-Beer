@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../components/Navbar";
+import ClientNavbar from "../../components/ClientNavbar";
 import Footer from "../../components/Footer";
 import {
   Card,
@@ -27,7 +27,12 @@ function ClientDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user"));
+    } catch {
+      user = null;
+    }
     if (!user?.branch) {
       setError("Салбарын мэдээлэл олдсонгүй.");
       return;
@@ -57,17 +62,14 @@ function ClientDashboard() {
 
   return (
     <>
-      <Navbar />
-      <div
-        className="p-8 max-w-7xl mx-auto"
-        style={{ minHeight: "80vh", backgroundColor: "#fafafa" }}
-      >
-        <Title
-          level={2}
-          style={{ textAlign: "center", marginBottom: 36, color: "#222" }}
-        >
-          Таны салбар: {userBranch || "Тодорхойгүй"}
-        </Title>
+      <ClientNavbar />
+      <div className="min-h-screen bg-slate-50 py-10">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-10 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+            <Title level={2} className="text-center text-slate-900">
+              Таны салбар: {userBranch || "Тодорхойгүй"}
+            </Title>
+          </div>
 
         {loading && (
           <div style={{ textAlign: "center", marginTop: 80 }}>
@@ -156,7 +158,7 @@ function ClientDashboard() {
                     <Space
                       direction="vertical"
                       size="large"
-                      style={{ width: "340px" }}
+                      style={{ width: "100%" }}
                     >
                       <Row justify="space-between" style={{ fontSize: 15 }}>
                         <Col xs={24} sm={12}>
@@ -246,6 +248,7 @@ function ClientDashboard() {
           />
         )}
       </div>
+    </div>
       <Footer />
     </>
   );

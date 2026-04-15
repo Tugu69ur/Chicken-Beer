@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 @import "leaflet/dist/leaflet.css";
 
@@ -6,72 +6,100 @@
 @tailwind components;
 @tailwind utilities;
 
-
-body {
-  margin: 0;
-  font-family: 'Manrope', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --brand-red: #d81e1e;
+  --brand-red-dark: #b11616;
+  --brand-yellow: #f7b500;
+  --brand-black: #1f1f1f;
+  --surface: #ffffff;
+  --surface-soft: #f8f3ef;
+  --border: #e5e0dc;
 }
 
 html {
   scroll-behavior: smooth;
 }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Manrope', sans-serif;
+  background: radial-gradient(circle at top left, rgba(216, 29, 30, 0.12), transparent 24%), linear-gradient(180deg, #fffaf6 0%, #fff 45%, #f5efe8 100%);
+  color: var(--brand-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(216, 29, 30, 0.15);
+}
+
+.hero-panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.section-heading {
+  letter-spacing: 0.02em;
+}
+
+.card-surface {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+}
+
+.btn-brand {
+  @apply inline-flex items-center justify-center rounded-full bg-[#D81E1E] px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#B11616] focus:outline-none focus:ring-2 focus:ring-[#D81E1E]/30;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full border border-[#D81E1E] bg-white px-5 py-3 text-sm font-semibold text-[#D81E1E] transition duration-300 hover:bg-[#faf0ef];
+}
+
+.card-glow {
+  box-shadow: 0 20px 60px rgba(216, 29, 30, 0.12);
+}
+
 .leaflet-marker-icon.round-icon {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
 }
 
-
 .custom-search .ant-input {
-  border-radius: 4px 0 0 4px;
-  border-color: #D81E1E;
-  background-color: white;
-  color: #000;
-  transition: border-color 0.3s;
-  box-shadow: none !important;
+  border-radius: 8px;
+  border-color: var(--brand-red);
 }
 
-.custom-search .ant-input:focus,
-.custom-search .ant-input:focus-visible {
-  border-color: #D81E1E !important;
-  box-shadow: none !important;
-  outline: none !important;
+.custom-search .ant-btn-primary {
+  background-color: var(--brand-red);
+  border-color: var(--brand-red);
 }
 
-.custom-search .ant-input-search-button {
-  background-color: #D81E1E !important;
-  border-color: #D81E1E !important;
-  border-radius: 0 4px 4px 0;
-  color: white !important;
-  box-shadow: none !important;
-  transition: background-color 0.3s;
-}
-
-.custom-search .ant-input-search-button:hover,
-.custom-search .ant-input-search-button:focus,
-.custom-search .ant-input-search-button:focus-visible {
-  background-color: #b11616 !important;
-  border-color: #b11616 !important;
-  color: white !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-.custom-search .ant-input-search-button svg {
-  fill: white;
+.custom-search .ant-btn-primary:hover,
+.custom-search .ant-btn-primary:focus {
+  background-color: var(--brand-red-dark);
+  border-color: var(--brand-red-dark);
 }
 
 .ant-btn-primary {
-  background-color: #dc2626 !important; /* red-600 */
-  border-color: #dc2626 !important;
+  background-color: var(--brand-red) !important;
+  border-color: var(--brand-red) !important;
   color: white !important;
 }
 
 .ant-btn-primary:hover,
 .ant-btn-primary:focus {
-  background-color: #b91c1c !important; /* red-700 */
-  border-color: #b91c1c !important;
+  background-color: var(--brand-red-dark) !important;
+  border-color: var(--brand-red-dark) !important;
   color: white !important;
 }

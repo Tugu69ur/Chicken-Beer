@@ -16,7 +16,7 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 
 import { BASE_URL } from "../../../constants";
-import Navbar from "../../components/Navbar";
+import AdminNavbar from "../../components/AdminNavbar";
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -141,30 +141,46 @@ const AdminDashboard = () => {
   });
 
   return (
-    <>
-      <Navbar />
-      <Layout>
-        <Layout>
+  
+    <div className="min-h-screen bg-slate-100">
+      <AdminNavbar />
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-3xl font-black text-slate-950">Админ самбар</h2>
+              <p className="mt-2 text-slate-600">
+                Таны системийн статистик, захиалга ба орлогын ерөнхий үзүүлэлт.
+              </p>
+            </div>
+            <div className="rounded-full bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
+              Шинэчилсэн: {new Date().toLocaleDateString("mn-MN")}
+            </div>
+          </div>
+        </div>
+      </div>
+      <Layout className="bg-transparent">
+        <Layout className="bg-transparent">
           <Header
             style={{
-              background: "#fff",
+              background: "transparent",
               padding: "0 24px",
-              boxShadow: "0 2px 8px #f0f1f2",
+              boxShadow: "none",
             }}
           />
           <Content
             style={{
-              margin: "24px 32px",
+              margin: "0 32px 32px",
               display: "flex",
               justifyContent: "center",
             }}
           >
-            <div style={{ maxWidth: 1400, width: "100%" }} className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+            <div style={{ maxWidth: 1200, width: "100%" }} className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
               <Row gutter={[24, 24]}>
                 {/* Total Orders */}
                 <Col xs={24} sm={12} md={6}>
                   <Card
-                    title="Total Orders"
+                    title="Захиалгууд"
                     bordered={false}
                     style={{
                       borderRadius: 12,
@@ -180,7 +196,7 @@ const AdminDashboard = () => {
                 {/* Revenue */}
                 <Col xs={24} sm={12} md={6}>
                   <Card
-                    title="Revenue (₮)"
+                    title="Орлого (₮)"
                     bordered={false}
                     style={{
                       borderRadius: 12,
@@ -196,7 +212,7 @@ const AdminDashboard = () => {
                 {/* Admins and Clients - static for now */}
                 <Col xs={24} sm={12} md={6}>
                   <Card
-                    title="Admins"
+                    title="Админ"
                     bordered={false}
                     style={{
                       borderRadius: 12,
@@ -217,7 +233,7 @@ const AdminDashboard = () => {
                     <Progress {...progressConfig(40)} />
                   </Card>
                   <Card
-                    title="Clients"
+                    title="Үйлчлүүлэгчид"
                     bordered={false}
                     style={{
                       borderRadius: 12,
@@ -244,7 +260,7 @@ const AdminDashboard = () => {
           </Content>
         </Layout>
       </Layout>
-    </>
+    </div>
   );
 };
 

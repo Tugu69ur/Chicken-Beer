@@ -1,17 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import logo from "/assets/logo.png";
 import Login from "./Login";
-import ProfileIcon from "/assets/profile.png"; // Assuming you have a profile icon
+import ProfileIcon from "/assets/profile.png";
+
+const navLinks = [
+  { to: "/", label: "Меню" },
+  { to: "/map", label: "Салбар" },
+  { to: "/delivery", label: "Захиалгын явц" },
+];
 
 function Navbar() {
+  const location = useLocation();
   const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -21,134 +28,53 @@ function Navbar() {
 
   return (
     <>
-      <nav className="font-manrope bg-[#F9F9F9] shadow-md w-full">
-        <div
-          className={`mx-auto px-4 py-3 flex justify-between items-center ${
-            user?.role === "admin" || user?.role === "client"
-              ? "max-w-4xl"
-              : "max-w-2xl"
-          }`}
-        >
-          {/* Logo */}
-          <Link to="/">
-            <img src={logo} alt="Logo" className="h-14" />
+      <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="Chicken2030" className="h-14 w-auto object-contain" />
+            <div className="ml-10 mt-2 hidden sm:block">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#D81E1E]">Chicken & Beer</p>
+              <h1 className="text-lg font-black text-slate-900">CHICKEN2030</h1>
+            </div>
           </Link>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex space-x-6 items-center">
-            {user ? (
-              user.role === "client" ? (
-                <>
-                  <Link
-                    to="/client-dashboard"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Салбарын захиалгууд
-                  </Link>
-                  <Link
-                    to="/client-orders"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Хүргэлтийн захиалгууд
-                  </Link>
-                  <Link
-                    to="/map"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Түүхий эд захиалга
-                  </Link>
-                </>
-              ) : user.role === "admin" ? (
-                <>
-                  <Link
-                    to="/admin-dashboard"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/manage-admins"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Admins
-                  </Link>
-                  <Link
-                    to="/manage-clients"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Clients
-                  </Link>
-                  <Link
-                    to="/admin-menu"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Menu
-                  </Link>
-                  <Link
-                    to="/admin-branchs"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Branchs
-                  </Link>
-                </>
-              ) : (
-                // Other logged-in users
-                <>
-                  <Link to="/" className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base">
-                    Меню
-                  </Link>
-                  <Link
-                    to="/map"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Салбар
-                  </Link>
-                  <Link
-                    to="/delivery"
-                    className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
-                  >
-                    Захиалгын явц
-                  </Link>
-                </>
-              )
-            ) : (
-              // Guest links (not logged in)
-              <>
-                <Link to="/" className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base">
-                  Меню
-                </Link>
-                <Link to="/map" className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base">
-                  Салбар
-                </Link>
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => {
+              const isActive =
+                link.to === "/"
+                  ? location.pathname === "/"
+                  : location.pathname.startsWith(link.to);
+              return (
                 <Link
-                  to="/delivery"
-                  className="text-gray-700 hover:text-[#D81E1E] text-sm md:text-base"
+                  key={link.to}
+                  to={link.to}
+                  className={`text-base font-medium transition ${
+                    isActive
+                      ? "text-[#D81E1E]"
+                      : "text-slate-700 hover:text-[#D81E1E]"
+                  }`}
                 >
-                  Захиалгын явц
+                  {link.label}
                 </Link>
-              </>
-            )}
+              );
+            })}
+          </div>
 
-            {/* User profile or login (desktop) */}
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown((prev) => !prev)}
-                  className="flex items-center gap-2 focus:outline-none"
+                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
                 >
-                  <img
-                    src={ProfileIcon}
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                  <span className="text-gray-700 font-bold text-sm md:text-base">{user.name}</span>
+                  <img src={ProfileIcon} alt="User" className="h-8 w-8 rounded-full object-cover" />
+                  <span>{user.name}</span>
                 </button>
-
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-10">
+                  <div className="absolute right-0 mt-2 w-36 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="w-full px-4 py-3 text-left text-sm text-slate-700 transition hover:bg-slate-100"
                     >
                       Гарах
                     </button>
@@ -158,160 +84,67 @@ function Navbar() {
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="text-gray-700 hover:text-red-600 text-sm md:text-base"
+                className="btn-brand"
               >
                 Нэвтрэх
               </button>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setShowMobileMenu((prev) => !prev)}
-            className="md:hidden text-gray-700 focus:outline-none text-2xl"
+            className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-xl text-slate-700 transition hover:border-slate-300"
             aria-label="Open menu"
           >
             ☰
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {showMobileMenu && (
-          <div className="flex flex-col space-y-3 px-4 pb-4 md:hidden bg-[#F9F9F9] shadow">
-            {user ? (
-              user.role === "client" ? (
-                <>
+          <div className="border-t border-slate-200 bg-white px-4 pb-4 pt-3 md:hidden">
+            <div className="flex flex-col gap-3">
+              {navLinks.map((link) => {
+                const isActive =
+                  link.to === "/"
+                    ? location.pathname === "/"
+                    : location.pathname.startsWith(link.to);
+                return (
                   <Link
-                    to="/client-dashboard"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
+                    key={link.to}
+                    to={link.to}
                     onClick={() => setShowMobileMenu(false)}
+                    className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-[#FDECE7] text-[#D81E1E]"
+                        : "text-slate-700 hover:bg-slate-100"
+                    }`}
                   >
-                    Салбарын захиалгууд
+                    {link.label}
                   </Link>
-                  <Link
-                    to="/client-orders"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Хүргэлтийн захиалгууд
-                  </Link>
-                  <Link
-                    to="/map"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Түүхий эд захиалга
-                  </Link>
-                </>
-              ) : user.role === "admin" ? (
-                <>
-                  <Link
-                    to="/admin-dashboard"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/manage-admins"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Admins
-                  </Link>
-                  <Link
-                    to="/manage-clients"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Clients
-                  </Link>
-                  <Link
-                    to="/admin-menu"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Menu
-                  </Link>
-                  <Link
-                    to="/admin-branchs"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Branchs
-                  </Link>
-                </>
-              ) : (
-                // Other logged-in users
-                <>
-                  <Link to="/" className="text-gray-700 hover:text-[#D81E1E] text-base" onClick={() => setShowMobileMenu(false)}>
-                    Меню
-                  </Link>
-                  <Link
-                    to="/map"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Салбар
-                  </Link>
-                  <Link
-                    to="/delivery"
-                    className="text-gray-700 hover:text-[#D81E1E] text-base"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Захиалгын явц
-                  </Link>
-                </>
-              )
-            ) : (
-              // Guest links (not logged in)
-              <>
-                <Link to="/" className="text-gray-700 hover:text-[#D81E1E] text-base" onClick={() => setShowMobileMenu(false)}>
-                  Меню
-                </Link>
-                <Link to="/map" className="text-gray-700 hover:text-[#D81E1E] text-base" onClick={() => setShowMobileMenu(false)}>
-                  Салбар
-                </Link>
-                <Link
-                  to="/delivery"
-                  className="text-gray-700 hover:text-[#D81E1E] text-base"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  Захиалгын явц
-                </Link>
-              </>
-            )}
-
-            {/* User profile or login (mobile) */}
-            {user ? (
-              <div className="flex items-center gap-2 mt-2">
-                <img
-                  src={ProfileIcon}
-                  alt="User"
-                  className="w-6 h-6 rounded-full object-cover"
-                />
-                <span className="text-gray-700 font-bold text-base">{user.name}</span>
+                );
+              })}
+              {user ? (
                 <button
                   onClick={() => {
                     setShowMobileMenu(false);
                     handleLogout();
                   }}
-                  className="ml-2 px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100"
                 >
                   Гарах
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  setShowLogin(true);
-                  setShowMobileMenu(false);
-                }}
-                className="text-gray-700 hover:text-red-600 text-base mt-2"
-              >
-                Нэвтрэх
-              </button>
-            )}
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowLogin(true);
+                  }}
+                  className="btn-brand w-full"
+                >
+                  Нэвтрэх
+                </button>
+              )}
+            </div>
           </div>
         )}
       </nav>
@@ -327,7 +160,6 @@ function Navbar() {
           }}
         />
       )}
-      <div className="w-full h-4 bg-red-600"></div>
     </>
   );
 }

@@ -16,7 +16,7 @@ import {
 import { ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { BASE_URL } from "../../../constants.js";
-import Navbar from "../../components/Navbar.jsx";
+import AdminNavbar from "../../components/AdminNavbar.jsx";
 import { toast } from "react-toastify";
 
 const { Title } = Typography;
@@ -130,10 +130,15 @@ const handleAddAdmin = async (values) => {
   ];
 
   return (
-    <>
-
-    <Navbar />
-    <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
+    <div className="min-h-screen bg-slate-100">
+      <AdminNavbar />
+      <div className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-8 lg:px-12">
+        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+          <Title level={2}>Админ Удирдлага</Title>
+          <p className="mt-2 max-w-2xl text-slate-600">
+            Админ, салбар, үйлчлүүлэгч болон менюг нэг цонхноос удирдана.
+          </p>
+        </div>
       <Row gutter={[24, 24]}>
         {/* Admin Add Form */}
         <Col xs={24} md={12}>
@@ -214,8 +219,8 @@ const handleAddAdmin = async (values) => {
           </Card>
         </Col>
       </Row>
+      </div>
     </div>
-    </>
   );
 };
 

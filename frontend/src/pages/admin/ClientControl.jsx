@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { BASE_URL } from "../../../constants";
-import Navbar from "../../components/Navbar";
+import AdminNavbar from "../../components/AdminNavbar";
 const { Title } = Typography;
 const { Option } = Select;
 const { confirm } = Modal;
@@ -163,9 +163,13 @@ const ManageClients = () => {
   ];
 
   return (
-    <>
-      <Navbar />
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 max-w-[1500px] w-full mx-auto">
+    <div className="min-h-screen bg-slate-100">
+      <AdminNavbar />
+      <div className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-8 lg:px-12">
+        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
+          <Title level={2}>Үйлчлүүлэгчид</Title>
+          <p className="mt-2 text-slate-600">Шинэ үйлчлүүлэгч нэмэх, салбарын дагалдах мэдээллийг засварлах.</p>
+        </div>
         <Row gutter={[24, 24]}>
           {/* Add Client */}
           <Col xs={24} md={12}>
@@ -267,7 +271,7 @@ const ManageClients = () => {
           </Col>
         </Row>
       </div>
-    </>
+    </div>
   );
 };
 

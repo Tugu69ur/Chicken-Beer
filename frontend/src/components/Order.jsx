@@ -8,7 +8,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 const { Title, Text, Paragraph } = Typography;
 
-// Safe parse helper for selectedBranch
 function safeParseSelectedBranch() {
   const val = localStorage.getItem("selectedBranch");
   if (!val) return null;
@@ -36,21 +35,19 @@ function Menu({ addOrder }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loginPrompt, setLoginPrompt] = useState(false);
-
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () =>
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-
-  const getNumericPrice = (priceString) => {
-    return parseInt(priceString.replace(/[^\d]/g, ""), 10);
-  };
-
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
   const selectedOption = localStorage.getItem("orderOption") || "delivery";
   const selectedBranch = safeParseSelectedBranch();
   const locationText = localStorage.getItem("locationText") || "";
+
+  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
+
+  const getNumericPrice = (priceString) => {
+    return parseInt(priceString.replace(/[^\d]/g, ""), 10);
+  };
 
   const handleAddToBasket = (item) => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -64,18 +61,19 @@ function Menu({ addOrder }) {
       return;
     }
 
-    if (
-      selectedOption === "delivery" &&
-      (!locationText || locationText.trim() === "")
-    ) {
-      toast.error(
-        "Байршил тодорхойлогдоогүй байна. Байршил авах эсвэл оруулна уу."
-      );
+    if (selectedOption === "delivery" && !locationText.trim()) {
+      toast.error("Байршил тодорхойлогдоогүй байна. Байршил авах эсвэл оруулна уу.");
       return;
     }
 
     setSelectedItem(item);
+    setQuantity(1);
     setShowConfirmDialog(true);
+  };
+
+  const addToCart = (product) => {
+    addOrder(product, quantity);
+    toast.success("Сагсанд нэмэгдлээ");
   };
 
   const confirmAddToBasket = () => {
@@ -95,11 +93,6 @@ function Menu({ addOrder }) {
     navigate("/orders");
   };
 
-  const addToCart = (product) => {
-    addOrder(product, quantity);
-    toast.success("Сагсанд нэмэгдлээ");
-  };
-
   useEffect(() => {
     fetch(`${BASE_URL}api/menu`)
       .then((res) => {
@@ -111,7 +104,6 @@ function Menu({ addOrder }) {
           setMenu(groupByCategory(json.data));
         } else {
           setMenu([]);
-          console.warn("API returned success false or data is not array");
         }
         setLoading(false);
       })
@@ -121,45 +113,44 @@ function Menu({ addOrder }) {
       });
   }, []);
 
-  if (loading) return <div className="text-center mt-20">Loading...</div>;
+  if (loading) return <div className="text-center mt-20 text-slate-600">Loading...</div>;
   if (menu.length === 0)
-    return <div className="text-center mt-20">No menu items found</div>;
+    return <div className="text-center mt-20 text-slate-600">No menu items found</div>;
 
   return (
-    <div className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-44 mt-8 sm:mt-12">
+    <div className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8 mt-8 sm:mt-12">
       {menu.map((category, idx) => (
-        <div key={idx} className="mb-12">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl mb-4 sm:mb-6 ml-2 sm:ml-6 text-start">{category.title}</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-9">
+        <section key={idx} className="mb-14">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-slate-900">{category.title}</h2>
+            <span className="rounded-full bg-[#FFF0E7] px-3 py-1 text-sm font-semibold text-[#B94200]">
+              Нийт {category.items.length}
+            </span>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {category.items.map((item, index) => (
-              <div
-                key={index}
-                className="group bg-[#F9F9F9] border overflow-hidden rounded-md shadow-sm transition-all duration-300 hover:shadow-lg"
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-48 sm:h-48 md:h-72 object-cover"
-                />
-                <div className="p-4 transition-all duration-300">
-                  <h2 className="text-md font-bold">{item.name}</h2>
-                  <p className="text-red-600 font-bold text-lg sm:text-xl">
-                    {item.price}
-                  </p>
-                  <div className="mt-2 sm:mt-[-20px] opacity-100 sm:opacity-0 sm:max-h-0 sm:group-hover:opacity-100 sm:group-hover:max-h-40 transition-all duration-300 overflow-hidden">
-                    <p className="text-sm text-gray-600">{item.description}</p>
-                    <button
-                      className="w-full h-[40px] px-3 py-1 mt-3 bg-[#D81E1E] text-white text-sm font-bold rounded hover:bg-red-700"
-                      onClick={() => handleAddToBasket(item)}
-                    >
-                      Сагсанд хийх
-                    </button>
-                  </div>
+              <article key={index} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-2xl">
+                <div className="relative h-64 overflow-hidden">
+                  <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                 </div>
-              </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-semibold text-slate-900">{item.name}</h3>
+                    <p className="text-lg font-bold text-[#D81E1E]">{item.price}</p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600 line-clamp-3">{item.description}</p>
+                  <button
+                    onClick={() => handleAddToBasket(item)}
+                    className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-[#D81E1E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#B11616]"
+                  >
+                    Сагсанд хийх
+                  </button>
+                </div>
+              </article>
             ))}
           </div>
-        </div>
+        </section>
       ))}
 
       <Modal
@@ -167,20 +158,15 @@ function Menu({ addOrder }) {
         footer={null}
         centered
         onCancel={() => setLoginPrompt(false)}
-        styles={{
-          body: { padding: 24, textAlign: "center" },
-        }}
+        style={{ textAlign: "center" }}
+        bodyStyle={{ padding: 24 }}
       >
         <Title level={4}>Нэвтрэх шаардлагатай</Title>
         <Paragraph>Үргэлжлэхийн тулд эхлээд нэвтэрнэ үү.</Paragraph>
-        <Button
-          type="primary"
-          danger
-          onClick={() => {
-            setLoginPrompt(false);
-            navigate("/");
-          }}
-        >
+        <Button type="primary" danger onClick={() => {
+          setLoginPrompt(false);
+          navigate("/");
+        }}>
           Нэвтрэх
         </Button>
       </Modal>
@@ -191,75 +177,39 @@ function Menu({ addOrder }) {
         footer={null}
         width={600}
         centered
-        styles={{
-          body: { padding: 24 },
-        }}
+        style={{ textAlign: "center" }}
+        bodyStyle={{ padding: 24 }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <img src={icon} alt={selectedItem?.name} className="w-6 h-6" />
-          <Title level={3} style={{ margin: 0 }}>
-            Захиалга
-          </Title>
+        <div className="flex items-center gap-3 mb-4">
+          <img src={icon} alt={selectedItem?.name} className="h-7 w-7" />
+          <Title level={3} style={{ margin: 0 }}>Захиалга</Title>
         </div>
 
         {selectedItem && (
-          <Row gutter={24} align="middle">
-            {/* Image Section */}
+          <Row gutter={[24, 24]} align="middle">
             <Col xs={24} md={10}>
               <img
                 src={selectedItem.image}
                 alt={selectedItem.name}
-                style={{
-                  width: "100%",
-                  height: 150,
-                  borderRadius: 12,
-                  objectFit: "cover",
-                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
-                }}
+                className="h-40 w-full rounded-[20px] object-cover"
               />
             </Col>
-
-            {/* Info Section */}
             <Col xs={24} md={14}>
-              <Title level={4} style={{ marginBottom: 2, marginTop: 0 }}>
-                {selectedItem.name}
-              </Title>
-              <Text strong style={{ fontSize: 16 }}>
+              <Title level={4} style={{ margin: 0 }}>{selectedItem.name}</Title>
+              <Text strong style={{ fontSize: 16, display: 'block', marginTop: 8 }}>
                 {getNumericPrice(selectedItem.price).toLocaleString()} ₮
               </Text>
-              <Paragraph type="secondary" style={{ marginTop: 8 }}>
-                {selectedItem.description}
-              </Paragraph>
+              <Paragraph type="secondary" style={{ marginTop: 10 }}>{selectedItem.description}</Paragraph>
 
-              {/* Quantity Controls */}
-              <div
-                style={{ display: "flex", alignItems: "center", marginTop: 16 }}
-              >
-                <Button shape="circle" onClick={decreaseQuantity}>
-                  −
-                </Button>
-                <span style={{ margin: "0 16px", fontSize: 18 }}>
-                  {quantity}
-                </span>
-                <Button shape="circle" onClick={increaseQuantity}>
-                  +
-                </Button>
+              <div className="mt-5 flex items-center gap-4">
+                <Button type="default" shape="circle" onClick={decreaseQuantity} disabled={quantity <= 1}>−</Button>
+                <span className="text-lg font-semibold">{quantity}</span>
+                <Button type="default" shape="circle" onClick={increaseQuantity}>+</Button>
               </div>
 
-              {/* Total & Action Button */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginTop: 24,
-                }}
-              >
+              <div className="mt-8 flex items-center justify-between gap-4">
                 <Text strong style={{ fontSize: 20, color: "#D81E1E" }}>
-                  {(
-                    getNumericPrice(selectedItem.price) * quantity
-                  ).toLocaleString()}{" "}
-                  ₮
+                  {(getNumericPrice(selectedItem.price) * quantity).toLocaleString()} ₮
                 </Text>
                 <Button type="primary" danger onClick={confirmAddToBasket}>
                   Сагсанд хийх
@@ -270,38 +220,24 @@ function Menu({ addOrder }) {
         )}
       </Modal>
 
-      {/* Success Dialog */}
       {showSuccess && (
         <Modal
           open={showSuccess}
           footer={null}
           centered
           closable={false}
-          styles={{
-            body: { padding: 24, textAlign: "center" },
-            mask: {
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-            },
-          }}
+          style={{ textAlign: "center" }}
+          bodyStyle={{ padding: 24 }}
         >
-          <Title level={3} style={{ color: "#D81E1E", marginBottom: 16 }}>
-            Сагсанд хийлээ
-          </Title>
-          <Paragraph style={{ marginBottom: 24 }}>
-            Таны сагсанд амжилттай хийлэээ.
-          </Paragraph>
-          <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-            <Button onClick={handleContinueShopping} type="default">
-              Бүтээгдэхүүн нэмэх
-            </Button>
-            <Button onClick={handleGoToOrders} type="primary" danger>
-              Захиалга дуусгах
-            </Button>
+          <Title level={3} style={{ color: "#D81E1E", marginBottom: 16 }}>Сагсанд хийлээ</Title>
+          <Paragraph style={{ marginBottom: 24 }}>Таны сагсанд амжилттай нэмэгдлээ.</Paragraph>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button onClick={handleContinueShopping} type="default">Бүтээгдэхүүн нэмэх</Button>
+            <Button onClick={handleGoToOrders} type="primary" danger>Захиалга дуусгах</Button>
           </div>
         </Modal>
       )}
 
-      {/* Toast container to display toast notifications */}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
