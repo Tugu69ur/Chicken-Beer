@@ -20,6 +20,12 @@ export default defineConfig({
                 "react-router-dom",
                 "set-cookie-parser",
                 "string-convert",
+                "react",
+                "react-dom",
+                "scheduler",
+                "antd",
+                "@ant-design",
+                "@rc-component"
               ].includes(chunk)
             ) {
               return;
