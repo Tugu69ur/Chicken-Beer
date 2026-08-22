@@ -1,45 +1,33 @@
-import {
-  Form,
-  Input,
-  Button,
-  Table,
-  Typography,
-  Row,
-  Col,
-  Card,
-  Modal,
-  Spin,
-} from "antd";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { BASE_URL } from "../../../constants";
-import AdminNavbar from "../../components/AdminNavbar";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import markerIconPng from "leaflet/dist/images/marker-icon.png";
-import markerIcon2xPng from "leaflet/dist/images/marker-icon-2x.png";
-import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Form, Input, Button, Typography, Row, Col, Card, Spin, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { BASE_URL } from '../../../constants';
+import DataTable from '../../components/ui/data-table';
+import EmptyState from '../../components/ui/empty-state';
+import Section from '../../components/ui/section';
+import ConfirmDialog from '../../components/ui/confirm-dialog';
+import { MapPin, Navigation } from 'lucide-react';
 
 const { Title } = Typography;
-const { confirm } = Modal;
 
-const BranchControl = () => {
+function BranchControl() {
   const [form] = Form.useForm();
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
-  const [selectedPosition, setSelectedPosition] = useState(null);
 
   const defaultIcon = new L.Icon({
-    iconUrl: markerIconPng,
-    iconRetinaUrl: markerIcon2xPng,
-    shadowUrl: markerShadowPng,
+    iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png',
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -55,11 +43,11 @@ const BranchControl = () => {
       scrollWheelZoom: true,
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
     }).addTo(mapInstance.current);
 
-    mapInstance.current.on("click", function (e) {
+    mapInstance.current.on('click', function (e) {
       const { lat, lng } = e.latlng;
       setSelectedPosition([lat, lng]);
 
@@ -71,7 +59,7 @@ const BranchControl = () => {
 
       L.marker([lat, lng], { icon: defaultIcon })
         .addTo(mapInstance.current)
-        .bindPopup("Сонгосон байршил")
+        .bindPopup('Selected location')
         .openPopup();
     });
   }, []);
@@ -81,7 +69,7 @@ const BranchControl = () => {
       const res = await axios.get(`${BASE_URL}api/branches`);
       setBranches(res.data);
     } catch (error) {
-      toast.error("Салбаруудыг татаж чадсангүй.");
+      message.error('Failed to load branches');
     } finally {
       setLoading(false);
     }
@@ -93,7 +81,7 @@ const BranchControl = () => {
 
   const handleAddBranch = async (values) => {
     if (!selectedPosition) {
-      toast.error("Газрын зураг дээр салбарын байршлыг сонгоно уу!");
+      message.error('Please select a location on the map');
       return;
     }
 
@@ -103,12 +91,12 @@ const BranchControl = () => {
         ...values,
         position: selectedPosition,
       });
-      toast.success("Шинэ салбар нэмэгдлээ.");
+      message.success('New branch added');
       form.resetFields();
       setSelectedPosition(null);
       fetchBranches();
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      message.error(error.response?.data?.message || error.message);
     } finally {
       setAdding(false);
     }
@@ -117,127 +105,110 @@ const BranchControl = () => {
   const handleDeleteBranch = async (id) => {
     try {
       await axios.delete(`${BASE_URL}api/branches/${id}`);
-      toast.success("Салбар амжилттай устлаа.");
+      message.success('Branch deleted');
       fetchBranches();
     } catch (error) {
-      toast.error(error.message);
+      message.error(error.message);
     }
-  };
-
-  const showDeleteConfirm = (id) => {
-    confirm({
-      title: "Салбарыг устгах уу?",
-      icon: <ExclamationCircleOutlined />,
-      content: "Энэ үйлдэл нь буцаж болдоггүй!",
-      okText: "Тийм",
-      okType: "danger",
-      cancelText: "Үгүй",
-      onOk: async () => {
-        console.log("Deleting ID:", id); // Debug log
-        await handleDeleteBranch(id);
-      },
-      onCancel() {
-        console.log("Cancelled deletion");
-      },
-    });
+    setDeleteConfirm(null);
   };
 
   const columns = [
+    { title: 'Branch Name', dataIndex: 'name', key: 'name', render: (text) => <span className="font-medium text-ink">{text}</span> },
     {
-      title: "Салбарын нэр",
-      dataIndex: "name",
-      key: "name",
+      title: 'Location', dataIndex: 'position', key: 'position',
+      render: (pos) => (
+        <span className="text-ink-muted text-sm font-mono">
+          {pos ? `${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}` : '—'}
+        </span>
+      ),
     },
     {
-      title: "Үйлдэл",
-      key: "action",
+      title: 'Actions', key: 'action', width: 120,
       render: (_, record) => (
-        <Button danger onClick={() => handleDeleteBranch(record._id)}>
-          Устгах
+        <Button danger size="small" onClick={() => setDeleteConfirm(record)} className="rounded-full">
+          Delete
         </Button>
       ),
     },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <AdminNavbar />
-      <ToastContainer />
-      <div className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-8 lg:px-12">
-        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
-          <Title level={2}>Салбар Удирдах</Title>
-          <p className="mt-2 text-slate-600">Салбарын байршил, нэр, устгал зэргийг хялбархан удирдана.</p>
-        </div>
+    <div className="min-h-screen bg-surface-muted">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Section title="Branch Management" subtitle="Add new branches and manage locations." />
+
         <Row gutter={[24, 24]}>
-          <Col xs={24} md={12}>
-            <Card title="Шинэ Салбар Нэмэх" variant="outlined">
+          <Col xs={24} lg={10}>
+            <Card className="card-elevated border-0" title={
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-ink-muted" />
+                <span className="text-sm font-semibold text-ink">Add New Branch</span>
+              </div>
+            }>
               <Form layout="vertical" form={form} onFinish={handleAddBranch}>
-                <Form.Item
-                  label="Салбарын нэр"
-                  name="name"
-                  rules={[
-                    { required: true, message: "Салбарын нэр оруулна уу!" },
-                  ]}
-                >
-                  <Input placeholder="Жишээ: Хороолол салбар" />
+                <Form.Item label="Branch Name" name="name" rules={[{ required: true, message: 'Please enter branch name!' }]}>
+                  <Input placeholder="e.g. Khoroolol Branch" />
                 </Form.Item>
 
-                <Form.Item>
+                <Form.Item label="Select Location">
                   <div
                     ref={mapRef}
                     style={{
-                      height: "300px",
-                      borderRadius: "12px",
-                      marginTop: "0.5rem",
+                      height: '260px',
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--color-surface-dim)',
                     }}
-                    className="shadow"
                   />
                   {selectedPosition && (
-                    <p className="mt-2 text-sm text-gray-600">
-                      Сонгосон байршил: [{selectedPosition[0].toFixed(5)},{" "}
-                      {selectedPosition[1].toFixed(5)}]
+                    <p className="mt-2 text-xs text-ink-muted">
+                      Selected: [{selectedPosition[0].toFixed(5)}, {selectedPosition[1].toFixed(5)}]
                     </p>
                   )}
                 </Form.Item>
 
                 <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<PlusOutlined />}
-                    loading={adding}
-                    block
-                  >
-                    Салбар нэмэх
+                  <Button type="primary" htmlType="submit" icon={<PlusOutlined />} loading={adding} block className="rounded-full h-11">
+                    Add Branch
                   </Button>
-
                 </Form.Item>
               </Form>
             </Card>
           </Col>
 
-          <Col xs={24} md={12}>
-            <Card title="Бүртгэлтэй Салбарууд" variant="outlined">
+          <Col xs={24} lg={14}>
+            <Card className="card-elevated border-0" title={
+              <div className="flex items-center gap-2">
+                <Navigation size={16} className="text-ink-muted" />
+                <span className="text-sm font-semibold text-ink">Registered Branches</span>
+              </div>
+            }>
               {loading ? (
                 <div className="flex justify-center py-8">
                   <Spin size="large" />
                 </div>
+              ) : branches.length === 0 ? (
+                <EmptyState title="No branches found" description="Add your first branch to get started." />
               ) : (
-                                <Table
-                  dataSource={branches}
-                  columns={columns}
-                  rowKey="_id"
-                  pagination={{ pageSize: 5 }}
-                  size="small"
-                  scroll={{ x: true }}
-                />
+                <DataTable columns={columns} dataSource={branches} rowKey="_id" pagination={{ pageSize: 10 }} />
               )}
             </Card>
           </Col>
         </Row>
+
+        <ConfirmDialog
+          open={deleteConfirm !== null}
+          title="Delete Branch?"
+          description={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
+          onConfirm={() => handleDeleteBranch(deleteConfirm?._id)}
+          onCancel={() => setDeleteConfirm(null)}
+          confirmText="Delete"
+          danger
+        />
       </div>
     </div>
   );
-};
+}
 
 export default BranchControl;

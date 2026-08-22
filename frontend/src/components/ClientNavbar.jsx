@@ -1,20 +1,19 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
-import logo from "/assets/logo.png";
-import { LogoutOutlined, MenuOutlined } from "@ant-design/icons";
+import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import logo from '/assets/logo.png';
+import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 
 const clientLinks = [
-  { to: "/client-dashboard", label: "Самбар" },
-  { to: "/client-orders", label: "Захиалгууд" },
+  { to: '/client-dashboard', label: 'Dashboard', icon: '📊' },
+  { to: '/client-orders', label: 'Orders', icon: '📦' },
 ];
 
 function ClientNavbar() {
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
   const user = (() => {
     try {
-      const saved = localStorage.getItem("user");
+      const saved = localStorage.getItem('user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -23,33 +22,40 @@ function ClientNavbar() {
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link to="/client-dashboard" className="flex items-center gap-3">
-          <img src={logo} alt="Chicken2030" className="h-12 w-auto object-contain" />
-          <div className="hidden sm:block">
-            <p className="text-xs uppercase tracking-[0.28em] text-[#D81E1E]">Client Panel</p>
-            <h1 className="text-lg font-black text-slate-900">CHICKEN2030</h1>
+    <nav className="sticky top-0 z-sticky border-b border-surface-dim bg-surface shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link to="/client-dashboard" className="flex items-center gap-3 group">
+          <img
+            src={logo}
+            alt="Client"
+            className="h-10 w-10 rounded-xl object-contain bg-surface-muted p-1"
+          />
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Client Panel</p>
+            <h1 className="text-base font-extrabold text-ink tracking-tight">CHICKEN2030</h1>
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-1">
           {clientLinks.map((link) => {
-            const isActive = link.to === "/client-dashboard"
-              ? location.pathname === "/client-dashboard"
+            const isActive = link.to === '/client-dashboard'
+              ? location.pathname === '/client-dashboard'
               : location.pathname.startsWith(link.to);
             return (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`text-base font-medium transition ${
-                  isActive ? "text-[#D81E1E]" : "text-slate-700 hover:text-[#D81E1E]"
+                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? 'bg-brand-red text-white shadow-md shadow-brand-red/20'
+                    : 'text-ink-secondary hover:bg-surface-muted hover:text-ink'
                 }`}
               >
+                <span className="text-sm">{link.icon}</span>
                 {link.label}
               </Link>
             );
@@ -58,34 +64,25 @@ function ClientNavbar() {
 
         <div className="hidden md:flex items-center gap-3">
           {user ? (
-            <div className="relative">
+            <div className="flex items-center gap-3 rounded-full border border-surface-dim bg-surface-muted px-4 py-2 text-sm text-ink">
+              <span className="font-medium">{user.name}</span>
               <button
-                onClick={() => setShowDropdown((prev) => !prev)}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-300"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-full bg-brand-red px-3 py-1.5 text-white text-xs font-semibold transition hover:bg-brand-red-hover"
               >
-                <span>{user.name}</span>
+                <LogoutOutlined /> Logout
               </button>
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-40 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-3 text-left text-sm text-slate-700 transition hover:bg-slate-100"
-                  >
-                    Гарах
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
-            <Link to="/" className="btn-brand">
-              Нэвтрэх
+            <Link to="/" className="btn btn-primary btn-sm">
+              Sign In
             </Link>
           )}
         </div>
 
         <button
           onClick={() => setShowMobileMenu((prev) => !prev)}
-          className="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-xl text-slate-700"
+          className="md:hidden btn btn-ghost btn-sm"
           aria-label="Open client menu"
         >
           <MenuOutlined />
@@ -93,22 +90,23 @@ function ClientNavbar() {
       </div>
 
       {showMobileMenu && (
-        <div className="border-t border-slate-200 bg-white px-4 pb-4 pt-3 md:hidden">
-          <div className="flex flex-col gap-3">
+        <div className="border-t border-surface-dim bg-surface px-4 pb-4 pt-3 md:hidden animate-fade-in">
+          <nav className="flex flex-col gap-1">
             {clientLinks.map((link) => {
-              const isActive = link.to === "/client-dashboard"
-                ? location.pathname === "/client-dashboard"
+              const isActive = link.to === '/client-dashboard'
+                ? location.pathname === '/client-dashboard'
                 : location.pathname.startsWith(link.to);
               return (
                 <Link
                   key={link.to}
                   to={link.to}
                   onClick={() => setShowMobileMenu(false)}
-                  className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                    isActive ? "bg-[#FDECE7] text-[#D81E1E]" : "text-slate-700 hover:bg-slate-100"
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+                    isActive ? 'bg-brand-red-soft text-brand-red' : 'text-ink-secondary hover:bg-surface-muted'
                   }`}
                 >
-                  {link.label}
+                  <span>{link.icon}</span>
+                  <span>{link.label}</span>
                 </Link>
               );
             })}
@@ -117,11 +115,12 @@ function ClientNavbar() {
                 setShowMobileMenu(false);
                 handleLogout();
               }}
-              className="rounded-2xl border border-slate-200 bg-[#D81E1E] px-4 py-3 text-sm font-medium text-white"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 mt-2"
             >
-              Гарах
+              <LogoutOutlined />
+              <span>Logout</span>
             </button>
-          </div>
+          </nav>
         </div>
       )}
     </nav>

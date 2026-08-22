@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
-import Footer from "../components/Footer.jsx";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
-import { Button, Input, Radio, Tabs, Typography, Card, Divider } from "antd";
-import { ArrowLeftOutlined, HomeOutlined } from "@ant-design/icons";
-import { BASE_URL } from "../../constants.js";
-
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Button, Input, Radio, Typography, Card, Divider, Tabs } from 'antd';
+import { ArrowLeft } from 'lucide-react';
+import axios from 'axios';
+import { BASE_URL } from '../../constants';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
 function Qpay() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("home");
+  const [tab, setTab] = useState('home');
   const [selectedPayment, setSelectedPayment] = useState(null);
-  const [personType, setPersonType] = useState("individual");
+  const [personType, setPersonType] = useState('individual');
+  const [loading, setLoading] = useState(false);
 
-  const orders = JSON.parse(localStorage.getItem("orders")) || [];
-  const [phone, setPhone] = useState("");
-  const [entrance, setEntrance] = useState("");
-  const [code, setCode] = useState("");
-  const [door, setDoor] = useState("");
-  const [note, setNote] = useState("");
+  const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+  const [phone, setPhone] = useState('');
+  const [entrance, setEntrance] = useState('');
+  const [code, setCode] = useState('');
+  const [door, setDoor] = useState('');
+  const [note, setNote] = useState('');
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
+  const [extraPhone, setExtraPhone] = useState('');
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -36,38 +36,30 @@ function Qpay() {
           setLongitude(position.coords.longitude);
         },
         (error) => {
-          console.error("Geolocation error:", error);
-          toast.error("Байршлыг тодорхойлох боломжгүй байна.");
+          console.error('Geolocation error:', error);
+          toast.error('Unable to determine location.');
         }
       );
     } else {
-      toast.error("Таны браузер байршил дэмжихгүй байна.");
+      toast.error('Your browser does not support geolocation.');
     }
   }, []);
-  const address =
-    latitude && longitude ? `${latitude}, ${longitude}` : "Байршил тодорхойгүй";
 
+  const address = latitude && longitude ? `${latitude}, ${longitude}` : 'Location not determined';
   const exchangeRate = 3500;
 
   const totalAmount = orders.reduce((sum, item) => {
-    const numericPrice = parseInt(item.price.replace(/[^\d]/g, ""), 10);
+    const numericPrice = parseInt(String(item.price).replace(/[^\d]/g, ''), 10) || 0;
     return sum + numericPrice * item.quantity;
   }, 0);
 
   const amountUSD = (totalAmount / exchangeRate).toFixed(2);
 
-  const [extraPhone, setExtraPhone] = useState("");
-  const location =
-    localStorage.getItem("locationText") || "Хаяг тодорхойлогдоогүй" + address;
-
-  // Array of QR code image paths (update with your actual images)
-  const qpayQRCodes = ["/qr.png"];
-
-  // State to hold random QR code when qpay is selected
+  const qpayQRCodes = ['/qr.png'];
   const [randomQR, setRandomQR] = useState(null);
 
   useEffect(() => {
-    if (selectedPayment === "qpay") {
+    if (selectedPayment === 'qpay') {
       const randomIndex = Math.floor(Math.random() * qpayQRCodes.length);
       setRandomQR(qpayQRCodes[randomIndex]);
     } else {
@@ -77,23 +69,23 @@ function Qpay() {
 
   const validateForm = () => {
     if (!phone || !entrance || !code || !door || !extraPhone) {
-      toast.error("Бүх талбарыг бүрэн бөглөнө үү");
+      toast.error('Please fill in all fields');
       return false;
     }
     if (!/^\d{8}$/.test(phone)) {
-      toast.error("Утасны дугаар 8 оронтой тоо байх ёстой");
+      toast.error('Phone number must be 8 digits');
       return false;
     }
     if (!/^\d{8}$/.test(extraPhone)) {
-      toast.error("Нэмэлт утасны дугаар 8 оронтой тоо байх ёстой");
+      toast.error('Additional phone must be 8 digits');
       return false;
     }
     if (!selectedPayment) {
-      toast.error("Төлбөрийн хэлбэр сонгоно уу");
+      toast.error('Please select a payment method');
       return false;
     }
     if (!personType) {
-      toast.error("Төлбөрийн төрөл сонгоно уу");
+      toast.error('Please select person type');
       return false;
     }
     return true;
@@ -102,10 +94,12 @@ function Qpay() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    if (selectedPayment === "paypal") {
-      toast.info("Please complete the payment via PayPal button below.");
+    if (selectedPayment === 'paypal') {
+      toast.info('Please complete payment via PayPal button below.');
       return;
     }
+
+    setLoading(true);
 
     const orderData = {
       phone,
@@ -116,7 +110,7 @@ function Qpay() {
       extraPhone,
       paymentMethod: selectedPayment,
       personType,
-      address: location,
+      address: address,
       orders: orders.map((item) => ({
         name: item.name,
         price: item.price,
@@ -128,274 +122,225 @@ function Qpay() {
     try {
       const res = await axios.post(`${BASE_URL}api/orders`, orderData);
       if (res.data.success) {
-        toast.success("Төлбөр амжилттай илгээгдлээ!");
-        setTimeout(() => navigate("/"), 1500); // Wait 1.5 seconds
-        localStorage.removeItem("orders");
-        setPhone("");
-        setEntrance("");
-        setCode("");
-        setDoor("");
-        setNote("");
-        setExtraPhone("");
+        toast.success('Order placed successfully!');
+        setTimeout(() => navigate('/'), 1500);
+        localStorage.removeItem('orders');
+        setPhone('');
+        setEntrance('');
+        setCode('');
+        setDoor('');
+        setNote('');
+        setExtraPhone('');
         setSelectedPayment(null);
-        setPersonType("individual");
-        setTab("home");
+        setPersonType('individual');
+        setTab('home');
         setRandomQR(null);
       } else {
-        toast.error("Алдаа гарлаа. Дахин оролдоно уу.");
+        toast.error('Error. Please try again.');
       }
     } catch (err) {
-      console.error("Order submit error:", err);
-      toast.error("Сервертэй холбогдож чадсангүй.");
+      console.error('Order submit error:', err);
+      toast.error('Server connection failed.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="p-10 max-w-6xl mx-auto mb-52">
-        <div className="flex items-center mb-6">
-          <Button
-            size="large"
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate("/orders")}
-          />
-          <Title level={2} className="!mb-0 ml-8">
-            Захиалга
-          </Title>
+    <div className="min-h-screen bg-surface-muted py-8 sm:py-12">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center gap-3">
+          <button onClick={() => navigate('/orders')} className="btn btn-ghost btn-sm">
+            <ArrowLeft size={18} />
+          </button>
+          <span className="text-sm font-medium text-ink-muted">Cart</span>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-24 mt-10">
-          <div className="flex-1">
-            <Title level={4}>
-              <HomeOutlined className="mr-2" />
-              Хүргэлтийн захиалга
-            </Title>
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">Checkout</h1>
+          <p className="mt-1.5 text-ink-secondary">Complete your delivery order details below.</p>
+        </div>
 
-            <Text strong>Хаяг: </Text>
-            <Text>{location}</Text>
+        <div className="grid gap-8 lg:grid-cols-[1.4fr_0.85fr]">
+          <div className="space-y-6">
+            <Card className="card-elevated border-0" title={<span className="text-sm font-semibold text-ink">Delivery Information</span>}>
+              <div className="space-y-5">
+                <div className="rounded-xl bg-surface-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Location</p>
+                  <p className="text-sm text-ink">{address}</p>
+                </div>
 
-            <Tabs activeKey={tab} onChange={setTab} className="mt-2">
-              <Tabs.TabPane tab="Орон сууц" key="home" />
-              <Tabs.TabPane tab="Оффис" key="office" />
-            </Tabs>
+                <Tabs activeKey={tab} onChange={setTab} className="checkout-tabs">
+                  <Tabs.TabPane tab="Apartment" key="home" />
+                  <Tabs.TabPane tab="Office" key="office" />
+                </Tabs>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <Input
-                placeholder="Утасны дугаар"
-                rules={[
-                  {
-                    required: true,
-                    message: "Утасны дугаараа оруулна уу",
-                  },
-                  {
-                    pattern: /^\d{8}$/,
-                    message: "Утасны дугаар 8 оронтой тоо байх ёстой",
-                  },
-                ]}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              {tab === "office" ? (
-                <Input
-                  placeholder="Байгууллагын нэр"
-                  value={entrance}
-                  onChange={(e) => setEntrance(e.target.value)}
-                />
-              ) : (
-                <Input
-                  placeholder="Орцны дугаар"
-                  value={entrance}
-                  onChange={(e) => setEntrance(e.target.value)}
-                />
-              )}
-              <Input
-                placeholder="Орцны код"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-              <Input
-                placeholder="Хаалганы дугаар"
-                value={door}
-                onChange={(e) => setDoor(e.target.value)}
-              />
-            </div>
-
-            <div className="mt-4">
-              <TextArea
-                rows={2}
-                placeholder="Хаягийн тайлбар"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-              <Input
-                className="mt-2"
-                placeholder="Нэмэлт утасны дугаар"
-                value={extraPhone}
-                onChange={(e) => setExtraPhone(e.target.value)}
-              />
-            </div>
-
-            {/* Person Type */}
-            <div className="mt-6">
-              <Text strong>Төлбөрийн төрөл</Text>
-              <div className="mt-2">
-                <Radio.Group
-                  onChange={(e) => setPersonType(e.target.value)}
-                  value={personType}
-                >
-                  <Radio value="individual">Хувь хүн</Radio>
-                  <Radio value="company">Байгууллага</Radio>
-                </Radio.Group>
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="mt-6">
-              <Text strong>Төлбөрийн хэлбэр</Text>
-              <div className="mt-2 flex gap-4">
-                <Button
-                  type={selectedPayment === "qpay" ? "primary" : "default"}
-                  size="large"
-                  className={
-                    selectedPayment === "qpay" ? "bg-red-600 text-white" : ""
-                  }
-                  onClick={() => setSelectedPayment("qpay")}
-                >
-                  Qpay
-                </Button>
-
-                <Button
-                  type={selectedPayment === "paypal" ? "primary" : "default"}
-                  size="large"
-                  className={
-                    selectedPayment === "paypal"
-                      ? "bg-yellow-500 text-white"
-                      : ""
-                  }
-                  onClick={() => setSelectedPayment("paypal")}
-                >
-                  Card
-                </Button>
-              </div>
-            </div>
-
-            {/* Show random QR code when Qpay is selected */}
-            {selectedPayment === "qpay" && randomQR && (
-              <div className="mt-6 flex justify-center">
-                <img
-                  src={randomQR}
-                  alt="Qpay QR Code"
-                  className="w-48 h-48 object-contain"
-                />
-              </div>
-            )}
-
-            {/* PayPal Buttons */}
-            {selectedPayment === "paypal" && (
-              <div className="mt-6">
-                <PayPalScriptProvider
-                  options={{
-                    "client-id":
-                      "AUT2RUGAsNVG2RoDVeyI2S_a7RrfL7K_y8qWloWjPOorgG7AdWPVAxAkHvA_T72EhsUKLrf8fs766JBo",
-                    currency: "USD",
-                  }}
-                >
-                  <PayPalButtons
-                    style={{ layout: "vertical" }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        purchase_units: [
-                          {
-                            amount: {
-                              value: amountUSD,
-                            },
-                          },
-                        ],
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      const details = await actions.order.capture();
-                      toast.success(
-                        `Төлбөр амжилттай! Транзакцийн ID: ${details.id}`
-                      );
-                      console.log("Payment approved: ", details);
-                    }}
-                    onError={(err) => {
-                      toast.error("Төлбөр хийхэд алдаа гарлаа.");
-                      console.error("PayPal error:", err);
-                    }}
-                  />
-                </PayPalScriptProvider>
-              </div>
-            )}
-
-            {/* Submit button for other payment methods */}
-            {selectedPayment !== "paypal" && (
-              <Button
-                type="primary"
-                size="large"
-                block
-                className="mt-4"
-                onClick={handleSubmit}
-              >
-                Төлбөр төлөх
-              </Button>
-            )}
-          </div>
-
-          <Card className="w-full md:w-80" bordered>
-            <Title level={5}>Таны бүтээгдэхүүн</Title>
-
-            {orders.length === 0 ? (
-              <Text>Сагс хоосон байна.</Text>
-            ) : (
-              orders.map((item, index) => (
-                <div className="flex items-center mb-4" key={index}>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-24 h-16 object-cover mr-4"
-                  />
-                  <div className="flex-1">
-                    <Text className="block">
-                      {item.name} x{item.quantity}
-                    </Text>
-                    <Text strong>{item.price}</Text>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="label">Phone Number</label>
+                    <Input
+                      placeholder="8-digit phone number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      maxLength={8}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">{tab === 'office' ? 'Company Name' : 'Entrance Number'}</label>
+                    <Input
+                      placeholder={tab === 'office' ? 'Company name' : 'Entrance number'}
+                      value={entrance}
+                      onChange={(e) => setEntrance(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Entrance Code</label>
+                    <Input placeholder="Code" value={code} onChange={(e) => setCode(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="label">Door Number</label>
+                    <Input placeholder="Door number" value={door} onChange={(e) => setDoor(e.target.value)} />
                   </div>
                 </div>
-              ))
+
+                <div>
+                  <label className="label">Address Notes</label>
+                  <TextArea rows={2} placeholder="Additional address details" value={note} onChange={(e) => setNote(e.target.value)} />
+                  <div className="mt-4">
+                    <label className="label">Additional Phone</label>
+                    <Input
+                      placeholder="Additional phone number"
+                      value={extraPhone}
+                      onChange={(e) => setExtraPhone(e.target.value)}
+                      maxLength={8}
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-surface-dim bg-surface-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-3">Person Type</p>
+                  <Radio.Group onChange={(e) => setPersonType(e.target.value)} value={personType} className="flex gap-4">
+                    <Radio value="individual">Individual</Radio>
+                    <Radio value="company">Company</Radio>
+                  </Radio.Group>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="card-elevated border-0" title={<span className="text-sm font-semibold text-ink">Payment Method</span>}>
+              <div className="space-y-5">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    onClick={() => setSelectedPayment('qpay')}
+                    className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
+                      selectedPayment === 'qpay'
+                        ? 'border-brand-red bg-brand-red-soft text-brand-red'
+                        : 'border-surface-dim hover:border-ink-muted text-ink-secondary'
+                    }`}
+                  >
+                    QPay
+                  </button>
+                  <button
+                    onClick={() => setSelectedPayment('paypal')}
+                    className={`flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
+                      selectedPayment === 'paypal'
+                        ? 'border-brand-red bg-brand-red-soft text-brand-red'
+                        : 'border-surface-dim hover:border-ink-muted text-ink-secondary'
+                    }`}
+                  >
+                    Card
+                  </button>
+                </div>
+
+                {selectedPayment === 'qpay' && randomQR && (
+                  <div className="rounded-xl border border-surface-dim bg-white p-6 text-center">
+                    <p className="text-sm font-semibold text-ink mb-4">Scan QR Code to Pay</p>
+                    <img src={randomQR} alt="QPay QR Code" className="mx-auto h-44 w-44 object-contain" />
+                    <Text type="secondary" className="text-sm mt-2 block">
+                      Scan this QR code with your QPay app to complete payment.
+                    </Text>
+                  </div>
+                )}
+
+                {selectedPayment === 'paypal' && (
+                  <div className="rounded-xl border border-surface-dim bg-white p-6">
+                    <p className="text-sm font-semibold text-ink mb-4">Pay with PayPal</p>
+                    <PayPalScriptProvider
+                      options={{
+                        'client-id': 'AUT2RUGAsNVG2RoDVeyI2S_a7RrfL7K_y8qWloWjPOorgG7AdWPVAxAkHvA_T72EhsUKLrf8fs766JBo',
+                        currency: 'USD',
+                      }}
+                    >
+                      <PayPalButtons
+                        style={{ layout: 'vertical' }}
+                        createOrder={(data, actions) => {
+                          return actions.order.create({
+                            purchase_units: [{ amount: { value: amountUSD } }],
+                          });
+                        }}
+                        onApprove={async (data, actions) => {
+                          const details = await actions.order.capture();
+                          toast.success(`Payment successful! Transaction ID: ${details.id}`);
+                        }}
+                        onError={(err) => {
+                          toast.error('Payment failed.');
+                          console.error('PayPal error:', err);
+                        }}
+                      />
+                    </PayPalScriptProvider>
+                  </div>
+                )}
+
+                {selectedPayment !== 'paypal' && (
+                  <Button type="primary" size="large" block onClick={handleSubmit} loading={loading} className="rounded-full h-12">
+                    Place Order
+                  </Button>
+                )}
+              </div>
+            </Card>
+          </div>
+
+          <Card className="card-elevated border-0 h-fit sticky top-24">
+            <Title level={5} className="!text-ink !mb-4">Order Summary</Title>
+            {orders.length === 0 ? (
+              <p className="text-sm text-ink-muted text-center py-8">Your cart is empty</p>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((item, index) => (
+                  <div key={index} className="flex items-center gap-4 rounded-xl bg-surface-muted p-3">
+                    <img src={item.image} alt={item.name} className="h-14 w-14 rounded-lg object-cover" />
+                    <div className="flex-1 min-w-0">
+                      <Text strong className="text-ink block truncate text-sm">{item.name}</Text>
+                      <Text type="secondary" className="text-xs">×{item.quantity}</Text>
+                    </div>
+                    <Text strong className="text-ink text-sm whitespace-nowrap">
+                      {(parseInt(String(item.price).replace(/[^\d]/g, ''), 10) * item.quantity).toLocaleString()} ₮
+                    </Text>
+                  </div>
+                ))}
+                <Divider style={{ margin: '12px 0' }} />
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm text-ink-secondary">
+                    <span>Delivery</span>
+                    <span>0 ₮</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-ink-secondary">
+                    <span>Coupon</span>
+                    <span>0 ₮</span>
+                  </div>
+                </div>
+                <Divider style={{ margin: '12px 0' }} />
+                <div className="flex justify-between text-lg font-bold text-ink">
+                  <span>Total</span>
+                  <span className="text-brand-red">{totalAmount.toLocaleString()} ₮</span>
+                </div>
+              </div>
             )}
-
-            <Divider />
-
-            <div className="flex justify-between">
-              <Text>Хүргэлтийн үнэ</Text>
-              <Text>0₮</Text>
-            </div>
-            <div className="flex justify-between">
-              <Text>Купон</Text>
-              <Text>0₮</Text>
-            </div>
-
-            <Divider />
-
-            <div className="flex justify-between">
-              <Text strong>Нийт</Text>
-              <Text strong className="text-red-600">
-                {totalAmount.toLocaleString()}₮
-              </Text>
-            </div>
           </Card>
         </div>
       </div>
-
       <ToastContainer position="top-right" autoClose={3000} />
-
-      <Footer />
-    </>
+    </div>
   );
 }
 

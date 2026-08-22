@@ -1,14 +1,14 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
-import logo from "/assets/logo.png";
-import { LogoutOutlined, MenuOutlined } from "@ant-design/icons";
+import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import logo from '/assets/logo.png';
+import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 
 const adminLinks = [
-  { to: "/admin-dashboard", label: "Dashboard" },
-  { to: "/manage-admins", label: "Админ" },
-  { to: "/admin-branchs", label: "Салбар" },
-  { to: "/manage-clients", label: "Үйлчлүүлэгч" },
-  { to: "/admin-menu", label: "Меню" },
+  { to: '/admin-dashboard', label: 'Dashboard', icon: '📊' },
+  { to: '/manage-admins', label: 'Admins', icon: '👤' },
+  { to: '/admin-branchs', label: 'Branches', icon: '📍' },
+  { to: '/manage-clients', label: 'Clients', icon: '👥' },
+  { to: '/admin-menu', label: 'Menu', icon: '🍗' },
 ];
 
 function AdminNavbar() {
@@ -16,7 +16,7 @@ function AdminNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const user = (() => {
     try {
-      const saved = localStorage.getItem("user");
+      const saved = localStorage.getItem('user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -25,31 +25,36 @@ function AdminNavbar() {
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-slate-950/95 text-slate-100 shadow-xl shadow-slate-900/5 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link to="/admin-dashboard" className="flex items-center gap-3">
-          <img src={logo} alt="Admin" className="h-12 w-auto rounded-2xl bg-white/10 p-1" />
+    <nav className="sticky top-0 z-sticky border-b border-surface-dim bg-surface shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link to="/admin-dashboard" className="flex items-center gap-3 group">
+          <img
+            src={logo}
+            alt="Admin"
+            className="h-10 w-10 rounded-xl object-contain bg-surface-muted p-1"
+          />
           <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-slate-400">Admin Panel</p>
-            <h1 className="text-lg font-black text-white">CHICKEN2030</h1>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Admin Panel</p>
+            <h1 className="text-base font-extrabold text-ink tracking-tight">CHICKEN2030</h1>
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1">
           {adminLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                 location.pathname === link.to
-                  ? "bg-[#D81E1E] text-white shadow-lg shadow-[#D81E1E]/20"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  ? 'bg-brand-red text-white shadow-md shadow-brand-red/20'
+                  : 'text-ink-secondary hover:bg-surface-muted hover:text-ink'
               }`}
             >
+              <span className="text-sm">{link.icon}</span>
               {link.label}
             </Link>
           ))}
@@ -57,28 +62,28 @@ function AdminNavbar() {
 
         <div className="hidden md:flex items-center gap-3">
           {user ? (
-            <div className="flex items-center gap-3 rounded-full border border-slate-700 bg-white/5 px-4 py-2 text-sm text-slate-200">
-              <span>{user.name}</span>
+            <div className="flex items-center gap-3 rounded-full border border-surface-dim bg-surface-muted px-4 py-2 text-sm text-ink">
+              <span className="font-medium">{user.name}</span>
               <button
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-full bg-[#D81E1E] px-3 py-2 text-white transition hover:bg-[#b11c1c]"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-red px-3 py-1.5 text-white text-xs font-semibold transition hover:bg-brand-red-hover"
               >
-                <LogoutOutlined /> Гарах
+                <LogoutOutlined /> Logout
               </button>
             </div>
           ) : (
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-2 rounded-full bg-[#D81E1E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#b11c1c]"
+              className="btn btn-primary btn-sm"
             >
-              <LogoutOutlined /> Гарах
+              <LogoutOutlined /> Logout
             </button>
           )}
         </div>
 
         <button
           onClick={() => setShowMobileMenu((prev) => !prev)}
-          className="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-xl text-white"
+          className="md:hidden btn btn-ghost btn-sm"
           aria-label="Open admin menu"
         >
           <MenuOutlined />
@@ -86,27 +91,29 @@ function AdminNavbar() {
       </div>
 
       {showMobileMenu && (
-        <div className="border-t border-slate-800 bg-slate-950 px-4 pb-4 pt-3 md:hidden">
-          <div className="flex flex-col gap-3">
+        <div className="border-t border-surface-dim bg-surface px-4 pb-4 pt-3 md:hidden animate-fade-in">
+          <nav className="flex flex-col gap-1">
             {adminLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setShowMobileMenu(false)}
-                className={`rounded-2xl px-4 py-3 text-sm font-medium ${
-                  location.pathname === link.to ? "bg-[#D81E1E] text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+                  location.pathname === link.to ? 'bg-brand-red-soft text-brand-red' : 'text-ink-secondary hover:bg-surface-muted'
                 }`}
               >
-                {link.label}
+                <span>{link.icon}</span>
+                <span>{link.label}</span>
               </Link>
             ))}
             <button
               onClick={handleLogout}
-              className="rounded-2xl border border-slate-700 bg-[#D81E1E] px-4 py-3 text-sm font-medium text-white"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 mt-2"
             >
-              Гарах
+              <LogoutOutlined />
+              <span>Logout</span>
             </button>
-          </div>
+          </nav>
         </div>
       )}
     </nav>

@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { BASE_URL } from "../../constants.js";
-import { useNavigate } from "react-router-dom";
-import icon from "/assets/cart.png";
-import { Modal, Row, Col, Button, Typography } from "antd";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from 'react';
+import { BASE_URL } from '../../constants.js';
+import { useNavigate } from 'react-router-dom';
+import icon from '/assets/cart.png';
+import { Modal, Row, Col, Button, Typography, message } from 'antd';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { SkeletonCard, SkeletonText } from '../components/ui/loading-state';
+import EmptyState from '../components/ui/empty-state';
+import { Plus, Minus, ShoppingCart, X } from 'lucide-react';
 
 const { Title, Text, Paragraph } = Typography;
 
 function safeParseSelectedBranch() {
-  const val = localStorage.getItem("selectedBranch");
+  const val = localStorage.getItem('selectedBranch');
   if (!val) return null;
-
   try {
     return JSON.parse(val);
   } catch {
@@ -38,31 +40,38 @@ function Menu({ addOrder }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const selectedOption = localStorage.getItem("orderOption") || "delivery";
+  const selectedOption = localStorage.getItem('orderOption') || 'delivery';
   const selectedBranch = safeParseSelectedBranch();
-  const locationText = localStorage.getItem("locationText") || "";
+  const locationText = localStorage.getItem('locationText') || '';
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
   const getNumericPrice = (priceString) => {
-    return parseInt(priceString.replace(/[^\d]/g, ""), 10);
+    return parseInt(String(priceString).replace(/[^\d]/g, ''), 10) || 0;
   };
 
   const handleAddToBasket = (item) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('user'));
+      } catch {
+        return null;
+      }
+    })();
+
     if (!user) {
       setLoginPrompt(true);
       return;
     }
 
-    if (selectedOption === "pickup" && !selectedBranch) {
-      toast.error("Салбар сонгоогүй байна. Салбар сонгоно уу.");
+    if (selectedOption === 'pickup' && !selectedBranch) {
+      toast.error('Please select a branch first.');
       return;
     }
 
-    if (selectedOption === "delivery" && !locationText.trim()) {
-      toast.error("Байршил тодорхойлогдоогүй байна. Байршил авах эсвэл оруулна уу.");
+    if (selectedOption === 'delivery' && !locationText.trim()) {
+      toast.error('Location not set. Please enable location or enter it manually.');
       return;
     }
 
@@ -71,14 +80,9 @@ function Menu({ addOrder }) {
     setShowConfirmDialog(true);
   };
 
-  const addToCart = (product) => {
-    addOrder(product, quantity);
-    toast.success("Сагсанд нэмэгдлээ");
-  };
-
   const confirmAddToBasket = () => {
     if (selectedItem) {
-      addToCart(selectedItem);
+      addOrder(selectedItem, quantity);
       setShowConfirmDialog(false);
       setShowSuccess(true);
     }
@@ -90,13 +94,13 @@ function Menu({ addOrder }) {
   };
 
   const handleGoToOrders = () => {
-    navigate("/orders");
+    navigate('/orders');
   };
 
   useEffect(() => {
     fetch(`${BASE_URL}api/menu`)
       .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
+        if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
       })
       .then((json) => {
@@ -108,43 +112,83 @@ function Menu({ addOrder }) {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Fetch error:", err);
+        console.error('Fetch error:', err);
         setLoading(false);
+        message.error('Failed to load menu');
       });
   }, []);
 
-  if (loading) return <div className="text-center mt-20 text-slate-600">Loading...</div>;
-  if (menu.length === 0)
-    return <div className="text-center mt-20 text-slate-600">No menu items found</div>;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8 mt-8 sm:mt-12">
+        <div className="space-y-12">
+          {[1, 2, 3].map((section) => (
+            <div key={section} className="space-y-6">
+              <SkeletonText lines={1} />
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (menu.length === 0) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8 mt-8 sm:mt-12">
+        <EmptyState
+          title="No menu items available"
+          description="Our menu is being updated. Please check back later for delicious options."
+          actionLabel="Browse Home"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8 mt-8 sm:mt-12">
       {menu.map((category, idx) => (
-        <section key={idx} className="mb-14">
+        <section key={idx} className="mb-14 last:mb-0">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-slate-900">{category.title}</h2>
-            <span className="rounded-full bg-[#FFF0E7] px-3 py-1 text-sm font-semibold text-[#B94200]">
-              Нийт {category.items.length}
-            </span>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">{category.title}</h2>
+              <p className="mt-1 text-sm text-ink-muted">{category.items.length} items</p>
+            </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {category.items.map((item, index) => (
-              <article key={index} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-2xl">
-                <div className="relative h-64 overflow-hidden">
-                  <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              <article
+                key={index}
+                className="group bg-white rounded-2xl border border-surface-dim overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="relative h-52 overflow-hidden bg-surface-muted">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-lg font-semibold text-slate-900">{item.name}</h3>
-                    <p className="text-lg font-bold text-[#D81E1E]">{item.price}</p>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-base font-semibold text-ink leading-tight">{item.name}</h3>
+                    <p className="text-base font-bold text-brand-red whitespace-nowrap">
+                      {getNumericPrice(item.price).toLocaleString()} ₮
+                    </p>
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600 line-clamp-3">{item.description}</p>
+                  <p className="mt-2 text-sm text-ink-secondary leading-relaxed line-clamp-2">
+                    {item.description}
+                  </p>
                   <button
                     onClick={() => handleAddToBasket(item)}
-                    className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-[#D81E1E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#B11616]"
+                    className="mt-4 w-full btn btn-primary btn-sm"
                   >
-                    Сагсанд хийх
+                    Add to Cart
                   </button>
                 </div>
               </article>
@@ -153,90 +197,122 @@ function Menu({ addOrder }) {
         </section>
       ))}
 
+      {/* Login Prompt Modal */}
       <Modal
         open={loginPrompt}
         footer={null}
         centered
         onCancel={() => setLoginPrompt(false)}
-        style={{ textAlign: "center" }}
-        bodyStyle={{ padding: 24 }}
+        width={400}
+        className="premium-modal"
       >
-        <Title level={4}>Нэвтрэх шаардлагатай</Title>
-        <Paragraph>Үргэлжлэхийн тулд эхлээд нэвтэрнэ үү.</Paragraph>
-        <Button type="primary" danger onClick={() => {
-          setLoginPrompt(false);
-          navigate("/");
-        }}>
-          Нэвтрэх
-        </Button>
+        <div className="text-center py-4">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-red-soft">
+            <ShoppingCart size={24} className="text-brand-red" />
+          </div>
+          <Title level={4} className="!text-ink">Sign in required</Title>
+          <Paragraph className="text-ink-secondary">Please sign in to continue ordering.</Paragraph>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => {
+              setLoginPrompt(false);
+              navigate('/');
+            }}
+            className="rounded-full"
+          >
+            Sign In
+          </Button>
+        </div>
       </Modal>
 
+      {/* Add to Cart Confirmation Modal */}
       <Modal
         open={showConfirmDialog}
         onCancel={() => setShowConfirmDialog(false)}
         footer={null}
-        width={600}
+        width={520}
         centered
-        style={{ textAlign: "center" }}
-        bodyStyle={{ padding: 24 }}
+        className="premium-modal"
       >
-        <div className="flex items-center gap-3 mb-4">
-          <img src={icon} alt={selectedItem?.name} className="h-7 w-7" />
-          <Title level={3} style={{ margin: 0 }}>Захиалга</Title>
-        </div>
-
         {selectedItem && (
-          <Row gutter={[24, 24]} align="middle">
-            <Col xs={24} md={10}>
-              <img
-                src={selectedItem.image}
-                alt={selectedItem.name}
-                className="h-40 w-full rounded-[20px] object-cover"
-              />
-            </Col>
-            <Col xs={24} md={14}>
-              <Title level={4} style={{ margin: 0 }}>{selectedItem.name}</Title>
-              <Text strong style={{ fontSize: 16, display: 'block', marginTop: 8 }}>
-                {getNumericPrice(selectedItem.price).toLocaleString()} ₮
-              </Text>
-              <Paragraph type="secondary" style={{ marginTop: 10 }}>{selectedItem.description}</Paragraph>
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <Title level={4} className="!mb-0 text-ink">Add to Order</Title>
+              <button onClick={() => setShowConfirmDialog(false)} className="text-ink-muted hover:text-ink">
+                <X size={20} />
+              </button>
+            </div>
 
-              <div className="mt-5 flex items-center gap-4">
-                <Button type="default" shape="circle" onClick={decreaseQuantity} disabled={quantity <= 1}>−</Button>
-                <span className="text-lg font-semibold">{quantity}</span>
-                <Button type="default" shape="circle" onClick={increaseQuantity}>+</Button>
-              </div>
-
-              <div className="mt-8 flex items-center justify-between gap-4">
-                <Text strong style={{ fontSize: 20, color: "#D81E1E" }}>
-                  {(getNumericPrice(selectedItem.price) * quantity).toLocaleString()} ₮
+            <Row gutter={[24, 24]} align="middle">
+              <Col xs={24} md={10}>
+                <img
+                  src={selectedItem.image}
+                  alt={selectedItem.name}
+                  className="h-40 w-full rounded-xl object-cover"
+                />
+              </Col>
+              <Col xs={24} md={14}>
+                <Title level={5} className="!mb-1 text-ink">{selectedItem.name}</Title>
+                <Text strong className="text-lg text-brand-red">
+                  {getNumericPrice(selectedItem.price).toLocaleString()} ₮
                 </Text>
-                <Button type="primary" danger onClick={confirmAddToBasket}>
-                  Сагсанд хийх
-                </Button>
-              </div>
-            </Col>
-          </Row>
+                <Paragraph type="secondary" className="mt-2 text-sm">
+                  {selectedItem.description}
+                </Paragraph>
+
+                <div className="mt-5 flex items-center gap-3">
+                  <button
+                    onClick={decreaseQuantity}
+                    disabled={quantity <= 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-dim text-ink transition hover:border-ink-muted disabled:opacity-40"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="text-base font-bold text-ink w-8 text-center">{quantity}</span>
+                  <button
+                    onClick={increaseQuantity}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-dim text-ink transition hover:border-ink-muted"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between gap-4">
+                  <Text strong className="text-xl text-brand-red">
+                    {(getNumericPrice(selectedItem.price) * quantity).toLocaleString()} ₮
+                  </Text>
+                  <Button type="primary" size="large" onClick={confirmAddToBasket} className="rounded-full">
+                    Add to Cart
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </div>
         )}
       </Modal>
 
-      {showSuccess && (
-        <Modal
-          open={showSuccess}
-          footer={null}
-          centered
-          closable={false}
-          style={{ textAlign: "center" }}
-          bodyStyle={{ padding: 24 }}
-        >
-          <Title level={3} style={{ color: "#D81E1E", marginBottom: 16 }}>Сагсанд хийлээ</Title>
-          <Paragraph style={{ marginBottom: 24 }}>Таны сагсанд амжилттай нэмэгдлээ.</Paragraph>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button onClick={handleContinueShopping} type="default">Бүтээгдэхүүн нэмэх</Button>
-            <Button onClick={handleGoToOrders} type="primary" danger>Захиалга дуусгах</Button>
+      {/* Success Modal */}
+      <Modal
+        open={showSuccess}
+        footer={null}
+        centered
+        closable={false}
+        width={380}
+        className="premium-modal"
+      >
+        <div className="text-center py-6">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50">
+            <span className="text-2xl text-green-600">✓</span>
           </div>
-        </Modal>
-      )}
+          <Title level={4} className="!mb-2 text-ink">Added to Cart</Title>
+          <Paragraph className="text-ink-secondary mb-6">Item successfully added to your cart.</Paragraph>
+          <div className="flex flex-col gap-3">
+            <Button onClick={handleContinueShopping} className="rounded-full">Continue Shopping</Button>
+            <Button type="primary" onClick={handleGoToOrders} className="rounded-full">View Cart</Button>
+          </div>
+        </div>
+      </Modal>
 
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

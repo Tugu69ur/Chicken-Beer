@@ -1,52 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Form,
   Input,
   Button,
-  Table,
-  Space,
   Typography,
   Row,
   Col,
   Card,
-  Modal,
   notification,
   Spin,
-} from "antd";
-import { ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
-import { BASE_URL } from "../../../constants.js";
-import AdminNavbar from "../../components/AdminNavbar.jsx";
-import { toast } from "react-toastify";
+  message,
+} from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import axios from 'axios';
+import { BASE_URL } from '../../../constants';
+import DataTable from '../../components/ui/data-table';
+import EmptyState from '../../components/ui/empty-state';
+import Section from '../../components/ui/section';
+import ConfirmDialog from '../../components/ui/confirm-dialog';
+import { Users, Mail, Phone, Shield } from 'lucide-react';
 
 const { Title } = Typography;
-const { confirm } = Modal;
 
-const ManageAdmins = () => {
+function AdminControl() {
   const [form] = Form.useForm();
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingAdmin, setAddingAdmin] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const fetchAdmins = async () => {
     try {
       setLoading(true);
       const res = await axios.get(`${BASE_URL}api/users`);
       const users = res.data.users || [];
-      // Filter only admin users
-      const adminUsers = users.filter((user) => user.role === "admin");
-      // Map to include only necessary fields
+      const adminUsers = users.filter((user) => user.role === 'admin');
       const adminData = adminUsers.map((user) => ({
         _id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
+        createdAt: user.createdAt,
       }));
-      // Set the state with admin data
-
       setAdmins(adminData);
     } catch (error) {
-      notification.error({ message: "Алдаа", description: "Админуудыг татаж чадсангүй." });
+      notification.error({ message: 'Error', description: 'Failed to load admins.' });
     } finally {
       setLoading(false);
     }
@@ -56,172 +54,125 @@ const ManageAdmins = () => {
     fetchAdmins();
   }, []);
 
-const handleAddAdmin = async (values) => {
-  setAddingAdmin(true);
-  try {
-    await axios.post(`${BASE_URL}api/users`, {
-      name: values.name,
-      phone: values.phone,
-      email: values.email,
-      password: values.password,
-      role: "admin",
-    });
-    toast.success( "Шинэ админ нэмэгдлээ.");
-    form.resetFields();
-    fetchAdmins();
-  } catch (error) {
-    const msg = error.response?.data?.message || error.message;
-    notification.error({ message: "Алдаа", description: msg });
-  } finally {
-    setAddingAdmin(false);
-  }
-};
+  const handleAddAdmin = async (values) => {
+    setAddingAdmin(true);
+    try {
+      await axios.post(`${BASE_URL}api/users`, {
+        name: values.name,
+        phone: values.phone,
+        email: values.email,
+        password: values.password,
+        role: 'admin',
+      });
+      message.success('New admin added successfully');
+      form.resetFields();
+      fetchAdmins();
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message;
+      notification.error({ message: 'Error', description: msg });
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
 
   const handleDeleteAdmin = async (adminId) => {
     try {
       await axios.delete(`${BASE_URL}api/users/${adminId}`);
-      toast.success("Админ устгагдлаа.");
+      message.success('Admin deleted successfully');
       fetchAdmins();
     } catch (error) {
-      notification.error({ message: "Алдаа", description: error.message });
+      notification.error({ message: 'Error', description: error.message });
     }
-  };
-
-  const showDeleteConfirm = (adminId, name) => {
-    confirm({
-      title: `${name} админыг устгах уу?`,
-      icon: <ExclamationCircleOutlined />,
-      okText: "Тийм",
-      okType: "danger",
-      cancelText: "Үгүй",
-      onOk() {
-        return handleDeleteAdmin(adminId);
-      },
-    });
+    setDeleteConfirm(null);
   };
 
   const columns = [
+    { title: 'Name', dataIndex: 'name', key: 'name', render: (text) => <span className="font-medium text-ink">{text}</span> },
+    { title: 'Email', dataIndex: 'email', key: 'email', render: (text) => <span className="text-ink-secondary">{text}</span> },
+    { title: 'Phone', dataIndex: 'phone', key: 'phone', render: (text) => <span className="text-ink-secondary">{text}</span> },
     {
-      title: "Нэр",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => `${record.name}`,
-    },
-    {
-      title: "Имэйл",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Утас",
-      dataIndex: "phone",
-      key: "phone",
-      render: (text, record) => `${record.phone}`,
-    },
-    {
-      title: "Үйлдэл",
-      key: "action",
+      title: 'Actions', key: 'action', width: 120,
       render: (_, record) => (
-        <Button danger onClick={() => showDeleteConfirm(record._id, record.name)}>
-          Устгах
+        <Button danger size="small" onClick={() => setDeleteConfirm(record)} className="rounded-full">
+          Delete
         </Button>
       ),
     },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <AdminNavbar />
-      <div className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 md:px-8 lg:px-12">
-        <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
-          <Title level={2}>Админ Удирдлага</Title>
-          <p className="mt-2 max-w-2xl text-slate-600">
-            Админ, салбар, үйлчлүүлэгч болон менюг нэг цонхноос удирдана.
-          </p>
-        </div>
-      <Row gutter={[24, 24]}>
-        {/* Admin Add Form */}
-        <Col xs={24} md={12}>
-          <Card title="Шинэ Админ Нэмэх" bordered={false}>
-            <Form layout="vertical" form={form} onFinish={handleAddAdmin}>
-              <Row gutter={16}>
-                <Col xs={24} sm={12}>
-                  <Form.Item
-                    label="Нэр"
-                    name="name"
-                    rules={[{ required: true, message: "Нэр оруулна уу!" }]}
-                  >
-                    <Input placeholder="Жишээ: Мөнхбат" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item
-                    label="Утас"
-                    name="phone"
-                    rules={[{ required: true, message: "Утасны дугаар оруулна уу!" }]}
-                  >
-                    <Input placeholder="Жишээ: 99119911" />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item
-                label="Имэйл"
-                name="email"
-                rules={[
-                  { required: true, message: "Имэйл оруулна уу!" },
-                  { type: "email", message: "Имэйл формат буруу байна!" },
-                ]}
-              >
-                <Input placeholder="email@example.com" />
-              </Form.Item>
-              <Form.Item
-                label="Нууц үг"
-                name="password"
-                rules={[
-                  { required: true, message: "Нууц үг оруулна уу!" },
-                  { min: 6, message: "Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой!" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<PlusOutlined />}
-                  loading={addingAdmin}
-                  block
-                >
-                  Админ Нэмэх
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
+    <div className="min-h-screen bg-surface-muted">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Section title="Admin Management" subtitle="Add new administrators and manage existing accounts." />
 
-        {/* Admin List Table */}
-        <Col xs={24} md={12}>
-          <Card title="Бүртгэлтэй Админууд" bordered={false}>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Spin size="large" />
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={10}>
+            <Card className="card-elevated border-0" title={
+              <div className="flex items-center gap-2">
+                <Shield size={16} className="text-ink-muted" />
+                <span className="text-sm font-semibold text-ink">Add New Admin</span>
               </div>
-            ) : (
-              <Table
-                dataSource={admins}
-                columns={columns}
-                rowKey="_id"
-                pagination={{ pageSize: 5 }}
-                size="small"
-                scroll={{ x: true }}
-              />
-            )}
-          </Card>
-        </Col>
-      </Row>
+            }>
+              <Form layout="vertical" form={form} onFinish={handleAddAdmin}>
+                <Row gutter={16}>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Full Name" name="name" rules={[{ required: true, message: 'Please enter name!' }]}>
+                      <Input placeholder="e.g. Munkhbat" prefix={<Users size={14} className="text-ink-muted" />} />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Phone Number" name="phone" rules={[{ required: true, message: 'Please enter phone number!' }]}>
+                      <Input placeholder="e.g. 99119911" prefix={<Phone size={14} className="text-ink-muted" />} />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Please enter email!' }, { type: 'email', message: 'Invalid email format!' }]}>
+                  <Input placeholder="email@example.com" prefix={<Mail size={14} className="text-ink-muted" />} />
+                </Form.Item>
+                <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Please enter password!' }, { min: 6, message: 'Password must be at least 6 characters!' }]}>
+                  <Input.Password placeholder="Min. 6 characters" />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" icon={<PlusOutlined />} loading={addingAdmin} block className="rounded-full h-11">
+                    Add Admin
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+
+          <Col xs={24} lg={14}>
+            <Card className="card-elevated border-0" title={
+              <div className="flex items-center gap-2">
+                <Users size={16} className="text-ink-muted" />
+                <span className="text-sm font-semibold text-ink">Registered Admins</span>
+              </div>
+            }>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <Spin size="large" />
+                </div>
+              ) : admins.length === 0 ? (
+                <EmptyState title="No admins found" description="Add your first admin to get started." />
+              ) : (
+                <DataTable columns={columns} dataSource={admins} rowKey="_id" pagination={{ pageSize: 10 }} />
+              )}
+            </Card>
+          </Col>
+        </Row>
+
+        <ConfirmDialog
+          open={deleteConfirm !== null}
+          title="Delete Admin?"
+          description={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
+          onConfirm={() => handleDeleteAdmin(deleteConfirm?._id)}
+          onCancel={() => setDeleteConfirm(null)}
+          confirmText="Delete"
+          danger
+        />
       </div>
     </div>
   );
-};
+}
 
-export default ManageAdmins;
+export default AdminControl;

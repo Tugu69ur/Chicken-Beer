@@ -1,69 +1,81 @@
-import React from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import React from 'react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 function About() {
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,29,30,0.16),transparent_24%),linear-gradient(180deg,#fff7f1_0%,#fff_55%,#f5efe9_100%)] text-slate-900">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-          <section className="overflow-hidden rounded-[32px] bg-white/95 p-10 shadow-2xl ring-1 ring-slate-200">
-            <p className="text-sm uppercase tracking-[0.32em] text-[#D81E1E]">Бидний тухай</p>
-            <h1 className="mt-5 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-              Chicken2030 — Тахиа, Хурд, Амт
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">
-              Chicken2030 нь шалгарсан орц, хурдан үйлчилгээг нэгтгэж Монголын хамгийн амттай тахианы туршлагыг хэрэглэгчиддээ хүргэнэ. Бидний зорилго нь гэр бүл, найз нөхөд, хамт олонд зориулсан хялбар захиалга, чанартай тахиа, сайхан үйлчилгээ юм.
+    <div className="min-h-screen bg-surface">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="animate-fade-in-up">
+          <span className="text-xs font-bold uppercase tracking-widest text-brand-red">About Us</span>
+          <h1 className="mt-3 text-4xl font-extrabold text-ink tracking-tight sm:text-5xl">
+            Chicken2030 — Chicken, Speed, Taste
+          </h1>
+          <p className="mt-6 max-w-3xl text-lg text-ink-secondary leading-relaxed">
+            Chicken2030 combines exceptional ingredients and fast service to deliver the tastiest chicken experience in Mongolia. Our goal is to provide easy ordering, high-quality chicken, and excellent service for families, friends, and groups.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+          {[
+            {
+              title: 'Fresh Ingredients',
+              detail: 'We use only the freshest produce, delivered daily.',
+              icon: '🥬',
+            },
+            {
+              title: 'Fast Delivery',
+              detail: 'Your order delivered quickly and reliably.',
+              icon: '⚡',
+            },
+            {
+              title: 'Trusted Service',
+              detail: 'Smooth, friendly service with no hassle.',
+              icon: '🤝',
+            },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="card p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-rose-100 text-2xl">
+                {item.icon}
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-ink">{item.title}</h3>
+              <p className="mt-3 text-sm text-ink-secondary leading-relaxed">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
+          <div className="card p-8 card-elevated">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-red">Our Mission</span>
+            <h2 className="mt-4 text-2xl font-bold text-ink">Making everything easier</h2>
+            <p className="mt-4 text-ink-secondary leading-relaxed">
+              We aim to provide an easy, fast, and trustworthy ordering experience. Our platform ensures transparency and reliability at every step of the ordering process.
             </p>
-
-            <div className="mt-10 grid gap-6 sm:grid-cols-3">
+          </div>
+          <div className="card p-8 card-elevated">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-red">Why Choose Us?</span>
+            <ul className="mt-6 space-y-4">
               {[
-                {
-                  title: "Шинэхэн орц",
-                  detail: "Өдөр бүр шинээр ирсэн бүтээгдэхүүнээр амтална.",
-                },
-                {
-                  title: "Хурдан хүргэлт",
-                  detail: "Таны захиалгыг богино хугацаанд хүргэнэ.",
-                },
-                {
-                  title: "Найдвартай үйлчилгээ",
-                  detail: "Асуудалгүй, найрсаг харилцаатай үйлчилгээ.",
-                },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                'Taste our signature chicken with a unique, special flavor',
+                'Clean, fresh ingredients used in our recipes',
+                'Fast delivery with a service guarantee',
+              ].map((item, index) => (
+                <li
+                  key={index}
+                  className="flex items-start gap-3 rounded-2xl border border-surface-dim bg-surface-muted p-4 text-sm text-ink-secondary"
                 >
-                  <p className="text-sm uppercase tracking-[0.24em] text-[#D81E1E]">{item.title}</p>
-                  <p className="mt-4 text-base leading-7 text-slate-700">{item.detail}</p>
-                </div>
+                  <span className="mt-0.5 text-brand-red">✓</span>
+                  {item}
+                </li>
               ))}
-            </div>
-          </section>
-
-          <section className="mt-12 grid gap-6 md:grid-cols-2">
-            <div className="rounded-[32px] bg-[#fff3ed] p-8 shadow-2xl ring-1 ring-slate-200">
-              <p className="text-sm uppercase tracking-[0.28em] text-[#D81E1E]">Манай зорилго</p>
-              <h2 className="mt-4 text-3xl font-bold text-slate-950">Аливааг илүү хялбар болгох</h2>
-              <p className="mt-5 text-slate-600 leading-8">
-                Бид захиалга өгч байгаа хүмүүстээ илүү хялбар, түргэн, итгэлтэй үйлчилгээ үзүүлэхийг зорьдог. Манай платформ нь захиалгын бүх шатанд ил тод, найдвартай байдлыг хангана.
-              </p>
-            </div>
-            <div className="rounded-[32px] bg-[#f8fafc] p-8 shadow-2xl ring-1 ring-slate-200">
-              <p className="text-sm uppercase tracking-[0.28em] text-[#D81E1E]">Ямар давуу талтай вэ?</p>
-              <ul className="mt-6 space-y-4 text-slate-700">
-                <li className="rounded-3xl border border-slate-200 bg-white p-4">Амтат, өөрийн онцлогтой тайван тахианы амтыг мэдрэх</li>
-                <li className="rounded-3xl border border-slate-200 bg-white p-4">Цэвэр, шинэхэн орц ашигласан ур ороём</li>
-                <li className="rounded-3xl border border-slate-200 bg-white p-4">Хурдан хүргэлт, найдвартай үйлчилгээний баталгаа</li>
-              </ul>
-            </div>
-          </section>
+            </ul>
+          </div>
         </div>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }
 

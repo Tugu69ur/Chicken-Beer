@@ -6,6 +6,6 @@ import { getMenu , addMenu, deleteMenu, updateMenu} from "../controller/menu_con
 
 router.route("/").get(getMenu);
 router.route("/").post(addMenu);
-router.route("/:id").delete(deleteMenu);
+router.route("/:id").delete(deleteMenu).put(updateMenu);
 
 export default router;

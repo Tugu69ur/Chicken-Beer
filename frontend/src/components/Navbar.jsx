@@ -1,165 +1,199 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
-import logo from "/assets/logo.png";
-import Login from "./Login";
-import ProfileIcon from "/assets/profile.png";
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Login from '../components/Login';
+import logo from '/assets/logo.png';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Menu, X, ShoppingCart, ChevronDown, UtensilsCrossed } from 'lucide-react';
 
 const navLinks = [
-  { to: "/", label: "Меню" },
-  { to: "/map", label: "Салбар" },
-  { to: "/delivery", label: "Захиалгын явц" },
+  { to: '/', label: 'Menu' },
+  { to: '/map', label: 'Locations' },
+  { to: '/delivery', label: 'Track Order' },
 ];
 
-function Navbar() {
-  const location = useLocation();
+function Navbar({ basketCount = 0 }) {
   const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [cartCount, setCartCount] = useState(basketCount);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    setCartCount(basketCount);
+  }, [basketCount]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const user = (() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  })();
 
   const handleLogout = () => {
     localStorage.clear();
-    setUser(null);
-    window.location.href = "/";
+    toast.success('Logged out successfully');
+    window.location.href = '/';
   };
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={logo} alt="Chicken2030" className="h-14 w-auto object-contain" />
-            <div className="ml-10 mt-2 hidden sm:block">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#D81E1E]">Chicken & Beer</p>
-              <h1 className="text-lg font-black text-slate-900">CHICKEN2030</h1>
+      <header
+        className={`sticky top-0 z-sticky border-b border-surface-dim bg-white/95 backdrop-blur-md transition-shadow duration-300 ${
+          scrolled ? 'shadow-md' : ''
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 h-16 sm:px-6 lg:px-8">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-red text-white">
+              <UtensilsCrossed size={20} />
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red">
+                Chicken & Beer
+              </p>
+              <h1 className="text-base font-extrabold text-ink tracking-tight">
+                CHICKEN2030
+              </h1>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
-              const isActive =
-                link.to === "/"
-                  ? location.pathname === "/"
-                  : location.pathname.startsWith(link.to);
+              const isActive = link.to === '/'
+                ? location.pathname === '/'
+                : location.pathname.startsWith(link.to);
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`text-base font-medium transition ${
+                  className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
                     isActive
-                      ? "text-[#D81E1E]"
-                      : "text-slate-700 hover:text-[#D81E1E]"
+                      ? 'text-brand-red'
+                      : 'text-ink-secondary hover:text-ink hover:bg-surface-muted'
                   }`}
                 >
                   {link.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-brand-red" />
+                  )}
                 </Link>
               );
             })}
-          </div>
+          </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowDropdown((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+              <>
+                <Link
+                  to="/orders"
+                  className="relative hidden sm:flex h-10 w-10 items-center justify-center rounded-xl text-ink-secondary transition hover:bg-surface-muted hover:text-ink"
                 >
-                  <img src={ProfileIcon} alt="User" className="h-8 w-8 rounded-full object-cover" />
-                  <span>{user.name}</span>
-                </button>
-                {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-36 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-3 text-left text-sm text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Гарах
-                    </button>
-                  </div>
-                )}
-              </div>
+                  <ShoppingCart size={20} />
+                  {cartCount > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDropdown((prev) => !prev)}
+                    className="flex items-center gap-2 rounded-xl border border-surface-dim bg-white px-3 py-1.5 text-sm font-medium text-ink transition hover:border-ink-muted hover:shadow-sm"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red-soft text-brand-red text-xs font-bold">
+                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <span className="hidden sm:block max-w-[100px] truncate">{user.name}</span>
+                    <ChevronDown size={14} className="text-ink-muted" />
+                  </button>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-surface-dim bg-white shadow-lg animate-scale-in">
+                      <div className="px-4 py-3 border-b border-surface-dim bg-surface-muted/50">
+                        <p className="text-sm font-semibold text-ink">{user.name}</p>
+                        <p className="text-xs text-ink-muted mt-0.5">{user.phone}</p>
+                      </div>
+                      <div className="py-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full px-4 py-2.5 text-left text-sm font-medium text-error transition hover:bg-red-50"
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
-              <button
-                onClick={() => setShowLogin(true)}
-                className="btn-brand"
-              >
-                Нэвтрэх
+              <button onClick={() => setShowLogin(true)} className="btn btn-primary btn-sm">
+                Sign In
               </button>
             )}
-          </div>
 
-          <button
-            onClick={() => setShowMobileMenu((prev) => !prev)}
-            className="md:hidden rounded-full border border-slate-200 bg-white p-2 text-xl text-slate-700 transition hover:border-slate-300"
-            aria-label="Open menu"
-          >
-            ☰
-          </button>
+            <button
+              onClick={() => setShowMobileMenu((prev) => !prev)}
+              className="md:hidden flex h-10 w-10 items-center justify-center rounded-xl text-ink-secondary hover:bg-surface-muted"
+              aria-label="Open menu"
+            >
+              {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
 
         {showMobileMenu && (
-          <div className="border-t border-slate-200 bg-white px-4 pb-4 pt-3 md:hidden">
-            <div className="flex flex-col gap-3">
+          <div className="border-t border-surface-dim bg-white px-4 pb-4 pt-2 md:hidden animate-fade-in">
+            <nav className="flex flex-col gap-1">
               {navLinks.map((link) => {
-                const isActive =
-                  link.to === "/"
-                    ? location.pathname === "/"
-                    : location.pathname.startsWith(link.to);
+                const isActive = link.to === '/'
+                  ? location.pathname === '/'
+                  : location.pathname.startsWith(link.to);
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
                     onClick={() => setShowMobileMenu(false)}
-                    className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                       isActive
-                        ? "bg-[#FDECE7] text-[#D81E1E]"
-                        : "text-slate-700 hover:bg-slate-100"
+                        ? 'bg-brand-red-soft text-brand-red'
+                        : 'text-ink-secondary hover:bg-surface-muted'
                     }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-              {user ? (
-                <button
-                  onClick={() => {
-                    setShowMobileMenu(false);
-                    handleLogout();
-                  }}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                >
-                  Гарах
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setShowMobileMenu(false);
-                    setShowLogin(true);
-                  }}
-                  className="btn-brand w-full"
-                >
-                  Нэвтрэх
-                </button>
-              )}
-            </div>
+              <Link
+                to="/orders"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-ink-secondary hover:bg-surface-muted"
+              >
+                <span>Cart</span>
+                {cartCount > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </nav>
           </div>
         )}
-      </nav>
+      </header>
 
-      {showLogin && (
-        <Login
-          onClose={() => {
-            setShowLogin(false);
-            const savedUser = localStorage.getItem("user");
-            if (savedUser) {
-              setUser(JSON.parse(savedUser));
-            }
-          }}
-        />
-      )}
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      {showLogin && <Login onClose={() => setShowLogin(false)} />}
     </>
   );
 }

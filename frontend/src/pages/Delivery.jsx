@@ -1,94 +1,95 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import Navbar from '../components/Navbar'
-import axios from 'axios'
-import { BASE_URL } from '../../constants.js'
-import { Typography, Steps, Card, Tag, Space, Badge, Spin, Empty, List, Image, Divider, Button, Input, message } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
+import { BASE_URL } from '../../constants';
+import { Typography, Steps, Card, Tag, Space, Badge, Spin, Empty, List, Image, Divider, Button, Input, message, Row, Col } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import EmptyState from '../components/ui/empty-state';
+import { MapPin, Search, Package } from 'lucide-react';
 
-const { Title, Paragraph } = Typography
+const { Title, Paragraph } = Typography;
 
-const STATUS_ORDER = ['pending', 'accepted', 'cooking', 'delivering', 'delivered']
+const STATUS_ORDER = ['pending', 'accepted', 'cooking', 'delivering', 'delivered'];
 const STATUS_COLORS = {
-  pending: 'gold',
-  accepted: 'blue',
-  cooking: 'orange',
-  delivering: 'purple',
-  delivered: 'green',
-}
+  pending: 'warning',
+  accepted: 'info',
+  cooking: 'warning',
+  delivering: 'info',
+  delivered: 'success',
+};
 
 function getSavedPhone() {
-  const saved = localStorage.getItem('trackPhone') || ''
-  if (saved) return saved
+  const saved = localStorage.getItem('trackPhone') || '';
+  if (saved) return saved;
   try {
-    const rawUser = localStorage.getItem('user') || localStorage.getItem('currentUser')
-    if (!rawUser) return ''
-    const parsed = typeof rawUser === 'string' ? JSON.parse(rawUser) : rawUser
-    return parsed?.phone ? String(parsed.phone) : ''
+    const rawUser = localStorage.getItem('user') || localStorage.getItem('currentUser');
+    if (!rawUser) return '';
+    const parsed = typeof rawUser === 'string' ? JSON.parse(rawUser) : rawUser;
+    return parsed?.phone ? String(parsed.phone) : '';
   } catch {
-    return ''
+    return '';
   }
 }
 
 function Delivery() {
-  const [allOrders, setAllOrders] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [phone, setPhone] = useState(getSavedPhone)
-  const [searchPhone, setSearchPhone] = useState('')
-  const navigate = useNavigate()
+  const [allOrders, setAllOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState(getSavedPhone);
+  const [searchPhone, setSearchPhone] = useState('');
+  const navigate = useNavigate();
 
   const fetchAllOrders = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}api/orders`)
+      const res = await axios.get(`${BASE_URL}api/orders`);
       if (res.data?.success && Array.isArray(res.data.orders)) {
-        setAllOrders(res.data.orders)
+        setAllOrders(res.data.orders);
       }
     } catch {
       // ignore errors
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    fetchAllOrders()
-  }, [])
+    fetchAllOrders();
+  }, []);
 
   const handleSearch = () => {
-    const normalized = searchPhone.trim()
+    const normalized = searchPhone.trim();
     if (!/^[0-9]{8}$/.test(normalized)) {
-      message.error('Утасны дугаар 8 оронтой байх ёстой')
-      return
+      message.error('Phone number must be 8 digits');
+      return;
     }
-    setPhone(normalized)
-    localStorage.setItem('trackPhone', normalized)
-    message.success('Утасны дугаар хадгалагдлаа')
-  }
+    setPhone(normalized);
+    localStorage.setItem('trackPhone', normalized);
+    message.success('Phone number saved');
+  };
 
   const handleClearPhone = () => {
-    setPhone('')
-    setSearchPhone('')
-    localStorage.removeItem('trackPhone')
-  }
+    setPhone('');
+    setSearchPhone('');
+    localStorage.removeItem('trackPhone');
+  };
 
   const userOrders = useMemo(() => {
-    if (!phone) return []
+    if (!phone) return [];
     return allOrders
       .filter((o) => (o.phone || '').trim() === phone.trim())
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  }, [allOrders, phone])
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [allOrders, phone]);
 
-  const latestOrder = userOrders[0]
+  const latestOrder = userOrders[0];
 
   useEffect(() => {
-    if (!latestOrder || latestOrder.status === 'delivered') return
-    const id = setInterval(fetchAllOrders, 50000)
-    return () => clearInterval(id)
-  }, [latestOrder])
+    if (!latestOrder || latestOrder.status === 'delivered') return;
+    const id = setInterval(fetchAllOrders, 50000);
+    return () => clearInterval(id);
+  }, [latestOrder]);
 
   const currentStepIndex = (status) => {
-    const idx = STATUS_ORDER.indexOf(status || 'pending')
-    return idx === -1 ? 0 : idx
-  }
+    const idx = STATUS_ORDER.indexOf(status || 'pending');
+    return idx === -1 ? 0 : idx;
+  };
 
   const orderDate = latestOrder?.createdAt
     ? new Date(latestOrder.createdAt).toLocaleString('mn-MN', {
@@ -98,130 +99,121 @@ function Delivery() {
         hour: '2-digit',
         minute: '2-digit',
       })
-    : ''
+    : '';
 
   const totalAmount = latestOrder?.orders?.reduce((sum, item) => {
-    const price = parseInt(String(item.price).replace(/[^\d]/g, ''), 10) || 0
-    return sum + price * (item.quantity || 1)
-  }, 0) || 0
+    const price = parseInt(String(item.price).replace(/[^\d]/g, ''), 10) || 0;
+    return sum + price * (item.quantity || 1);
+  }, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,29,30,0.12),transparent_24%),linear-gradient(180deg,#fffaf6_0%,#f8f2ee_55%,#fff_100%)] pb-16">
-      <Navbar />
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <section className="mb-10 rounded-[32px] bg-white/95 p-8 shadow-2xl ring-1 ring-slate-200">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-[#D81E1E]">Захиалгын явц</p>
-              <Title level={2} className="mt-3 text-slate-950">
-                Таны захиалгын төлөв
-              </Title>
-            </div>
-            {phone ? (
-              <Tag className="rounded-full border border-[#D81E1E]/15 bg-[#fff1f0] px-4 py-2 text-sm font-semibold text-[#D81E1E]">
-                {"+976 "+phone}
-              </Tag>
-            ) : null}
+    <div className="min-h-screen bg-surface">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-red mb-2">
+            <MapPin size={14} />
+            Order Tracking
           </div>
-        </section>
+          <Title level={2} className="!mb-2 text-ink">
+            Track Your Order
+          </Title>
+          <Paragraph type="secondary" className="text-base">
+            Enter your phone number to check the status of your order.
+          </Paragraph>
+        </div>
 
         <div className="grid gap-8 xl:grid-cols-[1.25fr_1fr]">
-          <Card className="rounded-[32px] border border-slate-200 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+          <Card className="card-elevated border-0">
             {loading ? (
               <div className="flex min-h-[320px] items-center justify-center">
-                <Spin size="large" tip="Захиалгын мэдээлэл ачааллаж байна..." />
+                <Spin size="large" tip="Loading order information..." />
               </div>
             ) : !phone ? (
               <div className="flex min-h-[320px] flex-col justify-center gap-6">
-                <div className="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                  <Title level={4} className="text-slate-900">Утасны дугаараа оруулна уу</Title>
-                  <Paragraph className="max-w-lg mx-auto text-slate-600">
-                    Захиалгын статусыг харахын тулд 8 оронтой утасны дугаараа оруулна уу.
+                <div className="text-center">
+                  <Title level={4} className="text-ink">Enter your phone number</Title>
+                  <Paragraph className="max-w-lg mx-auto text-ink-secondary">
+                    Enter your 8-digit phone number to view your order status.
                   </Paragraph>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-[1.5fr_0.7fr]">
+                <div className="grid gap-3 sm:grid-cols-[1.5fr_0.7fr]">
                   <Input
                     size="large"
-                    placeholder="8 оронтой утасны дугаар"
+                    placeholder="8-digit phone number"
                     value={searchPhone}
                     onChange={(e) => setSearchPhone(e.target.value)}
+                    maxLength={8}
+                    prefix={<Search size={16} className="text-ink-muted" />}
                   />
-                  <Button type="primary" size="large" onClick={handleSearch}>
-                    Хайх
+                  <Button type="primary" size="large" onClick={handleSearch} className="rounded-full h-11">
+                    Track
                   </Button>
                 </div>
               </div>
             ) : !latestOrder ? (
               <div className="flex min-h-[320px] flex-col items-center justify-center gap-5 text-center">
-                <Empty description="Таны утасны дугаарт захиалга олдсонгүй" />
-                <Paragraph className="max-w-md text-slate-600">
-                  Та захиалга хийсний дараа захиалтын статус энд харагдана. Утасны дугаараа өөрчлөх бол доорх товчийг дарна уу.
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="No orders found for this number"
+                />
+                <Paragraph className="max-w-md text-ink-secondary">
+                  Your order status will appear here after placing an order.
                 </Paragraph>
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                  <Button type="primary" danger onClick={() => navigate('/')}>
-                    Захиалга хийх
+                  <Button type="primary" onClick={() => navigate('/')} className="rounded-full">
+                    Place Order
                   </Button>
-                  <Button onClick={handleClearPhone}>Утасны дугаар солих</Button>
+                  <Button onClick={handleClearPhone}>Change Number</Button>
                 </div>
               </div>
             ) : (
               <div>
-                <Card
-                  className="mb-8 rounded-[28px] border border-[#F0E3DF] bg-[#fff7f3] p-6"
-                  title={
-                    <Space align="center">
-                      <Badge color={STATUS_COLORS[latestOrder.status] || 'default'} />
-                      <span className="font-semibold">Захиалгын мэдээлэл</span>
-                    </Space>
-                  }
-                  extra={
+                <div className="mb-6 rounded-xl border border-surface-dim bg-brand-red-soft/30 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Order</p>
+                      <p className="mt-1 text-lg font-bold text-ink">#{latestOrder._id?.slice(-6) || '---'}</p>
+                    </div>
                     <Tag color={STATUS_COLORS[latestOrder.status] || 'default'}>
                       {(latestOrder.status || 'pending').toUpperCase()}
                     </Tag>
-                  }
-                >
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Захиалга</p>
-                      <p className="mt-2 text-lg font-semibold text-slate-900">#{latestOrder._id?.slice(-6) || '---'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Захиалсан</p>
-                      <p className="mt-2 text-lg font-semibold text-slate-900">{orderDate}</p>
-                    </div>
                   </div>
-                </Card>
+                </div>
 
-                <Steps current={currentStepIndex(latestOrder.status)} responsive>
-                  <Steps.Step title="Хүлээгдэж байна" description="Захиалга өгсөн" />
-                  <Steps.Step title="Хүлээн авсан" description="Салбар хүлээн авсан" />
-                  <Steps.Step title="Бэлтгэж байна" description="Захиалга бэлтгэж байна" />
-                  <Steps.Step title="Ачаалах" description="Хүргэлтийн ажилтан явж байна" />
-                  <Steps.Step title="Дууссан" description="Захиалга дууссан" />
+                <Steps
+                  current={currentStepIndex(latestOrder.status)}
+                  status={latestOrder.status === 'delivered' ? 'finish' : 'process'}
+                  className="mb-8"
+                  size="small"
+                >
+                  <Steps.Step title="Pending" description="Received" />
+                  <Steps.Step title="Accepted" description="Confirmed" />
+                  <Steps.Step title="Preparing" description="Cooking" />
+                  <Steps.Step title="Delivering" description="On the way" />
+                  <Steps.Step title="Delivered" description="Complete" />
                 </Steps>
 
                 <Divider />
-                <Title level={5} className="mb-4 text-slate-900">
-                  Захиалгын дэлгэрэнгүй
-                </Title>
+
+                <Title level={5} className="!text-ink mb-4">Order Details</Title>
                 <List
                   dataSource={latestOrder.orders || []}
                   rowKey={(item, idx) => `${latestOrder._id}-${idx}`}
                   renderItem={(item) => (
-                    <List.Item className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <List.Item className="rounded-xl border border-surface-dim bg-surface-muted p-4 mb-3 last:mb-0">
                       <Space align="start" size={16}>
                         <Image
                           src={item.image}
                           alt={item.name}
-                          width={80}
-                          height={60}
-                          style={{ objectFit: 'cover', borderRadius: 12 }}
+                          width={70}
+                          height={50}
+                          style={{ objectFit: 'cover', borderRadius: 10 }}
                           preview={false}
                           fallback="/fallback-image.png"
                         />
                         <div>
-                          <p className="font-semibold text-slate-900">{item.name}</p>
-                          <p className="text-sm text-slate-500">{item.price} × {item.quantity}</p>
+                          <p className="font-medium text-ink">{item.name}</p>
+                          <p className="text-sm text-ink-muted">{item.price} × {item.quantity}</p>
                         </div>
                       </Space>
                     </List.Item>
@@ -231,23 +223,21 @@ function Delivery() {
             )}
           </Card>
 
-          <Card className="w-full rounded-[32px] border border-slate-200 bg-[#fff4ed] shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-            <div className="space-y-6">
-              <div>
-                <Title level={4}>Товч мэдээлэл</Title>
-              </div>
+          <Card className="card-elevated border-0 h-fit sticky top-24">
+            <div className="space-y-5">
+              <Title level={4} className="!text-ink">Quick Info</Title>
               <div className="grid gap-4">
-                <div className="rounded-[24px] bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Нийт захиалга</p>
-                  <p className="mt-3 text-3xl font-semibold text-slate-900">{userOrders.length}</p>
+                <div className="rounded-xl bg-surface-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Total Orders</p>
+                  <p className="mt-2 text-2xl font-bold text-ink">{userOrders.length}</p>
                 </div>
-                <div className="rounded-[24px] bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Сүүлийн захиалгын дүн</p>
-                  <p className="mt-3 text-3xl font-semibold text-slate-900">{totalAmount.toLocaleString()} ₮</p>
+                <div className="rounded-xl bg-surface-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Last Order Amount</p>
+                  <p className="mt-2 text-2xl font-bold text-ink">{totalAmount.toLocaleString()} ₮</p>
                 </div>
-                <div className="rounded-[24px] bg-white p-5 shadow-sm">
-                  <p className="text-sm text-slate-500">Сүүлд шинэчилсэн</p>
-                  <p className="mt-3 text-lg font-semibold text-slate-900">{latestOrder ? orderDate : '---'}</p>
+                <div className="rounded-xl bg-surface-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Last Updated</p>
+                  <p className="mt-2 text-base font-semibold text-ink">{latestOrder ? orderDate : '---'}</p>
                 </div>
               </div>
             </div>
@@ -255,7 +245,7 @@ function Delivery() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Delivery
+export default Delivery;

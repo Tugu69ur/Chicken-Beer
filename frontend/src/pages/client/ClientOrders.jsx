@@ -1,49 +1,38 @@
-import React, { useEffect, useState } from "react";
-import ClientNavbar from "../../components/ClientNavbar";
-import {
-  Card,
-  Typography,
-  Table,
-  Tag,
-  Button,
-  Row,
-  Col,
-  Spin,
-  Empty,
-  Badge,
-  Image,
-  Space,
-} from "antd";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { BASE_URL } from "../../../constants";
+import { useEffect, useState } from 'react';
+import { Card, Typography, List, Tag, Button, Row, Col, Spin, Empty, Badge, Image, Space, message, Divider } from 'antd';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BASE_URL } from '../../../constants';
+import { SkeletonCard, SkeletonTable } from '../../components/ui/loading-state';
+import EmptyState from '../../components/ui/empty-state';
+import Section from '../../components/ui/section';
+import { CheckCircle, XCircle, MapPin, Phone, Clock, User } from 'lucide-react';
 
 const { Title, Text } = Typography;
 
 const STATUS_FLOW = {
-  pending: "accepted",
-  accepted: "cooking",
-  cooking: "delivering",
-  delivering: "delivered",
+  pending: 'accepted',
+  accepted: 'cooking',
+  cooking: 'delivering',
   delivered: null,
 };
 
 const STATUS_COLORS = {
-  pending: "gold",
-  accepted: "blue",
-  cooking: "orange",
-  delivering: "purple",
-  delivered: "green",
+  pending: 'warning',
+  accepted: 'info',
+  cooking: 'orange',
+  delivering: 'purple',
+  delivered: 'success',
 };
 
-const ALL_STATUSES = ["pending", "accepted", "cooking", "delivering", "delivered"];
+const ALL_STATUSES = ['pending', 'accepted', 'cooking', 'delivering', 'delivered'];
 
 function ClientOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("pending"); // default filter
+  const [filterStatus, setFilterStatus] = useState('pending');
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -53,17 +42,17 @@ function ClientOrders() {
       if (res.data.success && Array.isArray(res.data.orders)) {
         const ordersWithStatus = res.data.orders.map((order) => ({
           ...order,
-          status: order.status || "pending",
+          status: order.status || 'pending',
         }));
         setOrders(ordersWithStatus);
       } else {
-        setError("Failed to fetch orders");
-        toast.warn("Failed to fetch orders");
+        setError('Failed to fetch orders');
+        toast.warn('Failed to fetch orders');
       }
     } catch (err) {
-      setError("Server connection error");
-      toast.error("Failed to load orders");
-      console.error("Fetch error:", err);
+      setError('Server connection error');
+      toast.error('Failed to load orders');
+      console.error('Fetch error:', err);
     }
     setLoading(false);
   };
@@ -81,107 +70,67 @@ function ClientOrders() {
       );
       toast.success(`Order marked as ${newStatus.toUpperCase()}`);
     } catch (err) {
-      toast.error("Failed to update status");
-      console.error("Status update error:", err);
+      toast.error('Failed to update status');
+      console.error('Status update error:', err);
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}api/orders/${id}`);
-      toast.success("Order deleted successfully");
+      toast.success('Order deleted successfully');
       setOrders((prev) => prev.filter((order) => order._id !== id));
     } catch (err) {
-      toast.error("Failed to delete order");
-      console.error("Delete error:", err);
+      toast.error('Failed to delete order');
+      console.error('Delete error:', err);
     }
   };
 
-  // Filter orders by selected status
-  const filteredOrders = orders.filter(
-    (order) => order.status === filterStatus
-  );
+  const filteredOrders = orders.filter((order) => order.status === filterStatus);
 
   const columns = [
+    { title: 'Order #', key: 'idx', render: (_, __, index) => <span className="font-mono text-sm text-ink">#{index + 1}</span>, width: 80 },
+    { title: 'Customer', dataIndex: 'phone', key: 'phone', render: (text) => <span className="text-ink">{text}</span> },
+    { title: 'Address', dataIndex: 'address', key: 'address', ellipsis: true, render: (text) => <span className="text-ink-secondary">{text}</span> },
     {
-      title: "Order #",
-      key: "idx",
-      render: (_, __, index) => index + 1,
-      width: 80,
-    },
-    {
-      title: "Customer Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-      ellipsis: true,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       render: (status) => (
-        <Tag color={STATUS_COLORS[status] || "default"}>
-          {(status || "pending").toUpperCase()}
+        <Tag color={STATUS_COLORS[status] || 'default'} icon={status === 'delivered' ? <CheckCircle size={12} /> : status === 'pending' ? <XCircle size={12} /> : null}>
+          {(status || 'pending').toUpperCase()}
         </Tag>
       ),
     },
     {
-      title: "Ordered Items",
-      dataIndex: "orders",
-      key: "orders",
+      title: 'Items',
+      dataIndex: 'orders',
+      key: 'orders',
       render: (items) =>
         items?.map((item, idx) => (
-          <div
-            key={idx}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 8,
-            }}
-          >
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={60}
-              height={45}
-              style={{ objectFit: "cover", borderRadius: 6 }}
-              preview={false}
-              fallback="/fallback-image.png"
-            />
+          <div key={idx} className="flex items-center gap-3 py-1">
+            <Image src={item.image} alt={item.name} width={40} height={30} style={{ objectFit: 'cover', borderRadius: 6 }} preview={false} fallback="/fallback-image.png" />
             <div>
-              <div>{item.name}</div>
-              <div style={{ color: "#888" }}>
-                {item.price} × {item.quantity}
-              </div>
+              <div className="text-sm font-medium text-ink">{item.name}</div>
+              <div className="text-xs text-ink-muted">{item.price} × {item.quantity}</div>
             </div>
           </div>
-        )) || "No items",
+        )) || 'No items',
     },
     {
-      title: "Actions",
-      key: "actions",
+      title: 'Actions',
+      key: 'actions',
+      width: 180,
       render: (_, record) => {
         const next = STATUS_FLOW[record.status];
         return (
           <Space>
             {next && (
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => updateStatus(record._id, next)}
-              >
-                {next === "delivered"
-                  ? "Mark Delivered"
-                  : `Set to ${next.charAt(0).toUpperCase() + next.slice(1)}`}
+              <Button type="primary" size="small" onClick={() => updateStatus(record._id, next)} className="rounded-full">
+                {next === 'delivered' ? 'Mark Delivered' : `Set to ${next.charAt(0).toUpperCase() + next.slice(1)}`}
               </Button>
             )}
-            <Button size="small" danger onClick={() => handleDelete(record._id)}>
+            <Button size="small" danger onClick={() => handleDelete(record._id)} className="rounded-full">
               Delete
             </Button>
           </Space>
@@ -191,53 +140,72 @@ function ClientOrders() {
   ];
 
   return (
-    <>
-      <ClientNavbar />
-      <div className="min-h-screen bg-slate-50 py-10">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="mb-8 rounded-[32px] bg-white p-8 shadow-2xl ring-1 ring-slate-200">
-            <Title level={2} className="text-slate-900">
-              Захиалгын самбар
-            </Title>
-            <Text className="text-slate-600">
-              Захиалгын статус, тээвэрлэлт ба удирдлагын ажилбар.
-            </Text>
-          </div>
-        </div>
+    <div className="min-h-screen bg-surface-muted">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Section title="Order Management" subtitle="Track and manage all customer orders." />
 
-        {/* Status filter buttons */}
-        <Space style={{ marginBottom: 20 }}>
-          {ALL_STATUSES.map((status) => (
-            <Button
-              key={status}
-              type={filterStatus === status ? "primary" : "default"}
-              onClick={() => setFilterStatus(status)}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Button>
-          ))}
-        </Space>
+        <Card className="card-elevated border-0 mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Text type="secondary" className="text-sm">Filter orders by status</Text>
+            <Space wrap>
+              {ALL_STATUSES.map((status) => (
+                <Button
+                  key={status}
+                  type={filterStatus === status ? 'primary' : 'default'}
+                  onClick={() => setFilterStatus(status)}
+                  className="rounded-full"
+                  size="small"
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </Button>
+              ))}
+            </Space>
+          </div>
+        </Card>
 
         {loading ? (
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <Spin size="large" tip="Loading orders..." />
-          </div>
+          <SkeletonTable rows={5} />
         ) : error ? (
-          <Typography.Text type="danger">{error}</Typography.Text>
+          <EmptyState title="Error loading orders" description={error} actionLabel="Try Again" action={<Button type="primary" onClick={fetchOrders}>Try Again</Button>} />
         ) : filteredOrders.length === 0 ? (
-          <Empty description={`No ${filterStatus} orders`} />
+          <EmptyState title={`No ${filterStatus} orders`} description={`There are currently no orders with status "${filterStatus}".`} />
         ) : (
-          <Table
-            columns={columns}
-            dataSource={filteredOrders}
-            rowKey={(record) => record._id}
-            pagination={{ pageSize: 5 }}
-            scroll={{ x: "max-content" }}
-          />
+          <div className="grid gap-4">
+            {filteredOrders.map((order, index) => (
+              <Card key={order._id || index} className="card-elevated border-0">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-red-soft">
+                      <span className="font-bold text-brand-red">#{index + 1}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Text strong className="text-ink">{order.phone}</Text>
+                        <Tag color={STATUS_COLORS[order.status] || 'default'}>
+                          {(order.status || 'pending').toUpperCase()}
+                        </Tag>
+                      </div>
+                      <Text type="secondary" className="text-xs">{order.address}</Text>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {STATUS_FLOW[order.status] && (
+                      <Button type="primary" size="small" onClick={() => updateStatus(order._id, STATUS_FLOW[order.status])} className="rounded-full">
+                        {STATUS_FLOW[order.status] === 'delivered' ? 'Mark Delivered' : `Set ${STATUS_FLOW[order.status]}`}
+                      </Button>
+                    )}
+                    <Button size="small" danger onClick={() => handleDelete(order._id)} className="rounded-full">
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
-    </>
+    </div>
   );
 }
 
